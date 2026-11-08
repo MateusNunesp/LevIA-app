@@ -1,0 +1,15 @@
+appId: br.com.levia.app
+name: Área do RH e relatório NR-1 (modo demo)
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: "Você"
+- scrollUntilVisible: { element: "RH", direction: DOWN }
+- tapOn: "RH"
+- assertVisible: "Visão geral"
+- assertVisible: "Grupos com menos de 10 pessoas ficam ocultos."
+- assertNotVisible: "Mensagem"
+- tapOn: "Setores"
+- assertVisible: ".*menos de 10.*"
+- tapOn: "Relatório NR-1"
+- tapOn: "Gerar PDF"

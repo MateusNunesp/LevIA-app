@@ -1,0 +1,5 @@
+appId: br.com.levia.app
+---
+- tapOn: "Mensagem"
+- inputText: ${T}
+- tapOn: "Enviar"

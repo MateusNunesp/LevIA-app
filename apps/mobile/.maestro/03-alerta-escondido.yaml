@@ -1,0 +1,20 @@
+appId: br.com.levia.app
+name: Alerta escondido leva à saída 3 com vá hoje
+---
+- launchApp
+- runFlow: { file: _responder.yaml, env: { T: "recomecar" } }
+- runFlow: { file: _responder.yaml, env: { T: "lombar" } }
+- runFlow: { file: _responder.yaml, env: { T: "faz 3 dias e nao consigo segurar o xixi" } }
+- assertVisible: ".*xixi ou cocô.*"
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- runFlow: { file: _responder.yaml, env: { T: "4" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- repeat:
+    times: 8
+    commands:
+      - runFlow: { file: _responder.yaml, env: { T: "discordo" } }
+- runFlow: { file: _responder.yaml, env: { T: "pouco" } }
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Vá hoje a um pronto atendimento."

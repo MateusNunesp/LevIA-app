@@ -1,0 +1,211 @@
+# Árvore de decisão da LevIA — RASCUNHO para revisão da D5.
+# A ordem das regras importa: a primeira que casar decide.
+# Ordem: alerta (saída 3 + vá hoje) > caso complexo (3) > STarT Back (2) > D3 e recorrência (2) > saída 1 > sem regra (2).
+# Sinais de alerta: rascunho baseado no NICE NG59 e no framework internacional de red flags. TODO(D5): revisar.
+versao: 1
+status_revisao: precisa_de_revisao   # D5
+revisado_por: null
+revisado_em: null
+
+cortes:
+  dor_forte_minima: 8         # nota >= 8 -> caso complexo (saída 3)
+  dor_leve_maxima: 6          # saída 1 só com nota <= 6
+  dias_recente_max: 42        # saída 1 só com dor de até 6 semanas
+  start_back_saida2: [medio, alto]
+  d3:
+    semana1_piorou: true
+    semana2_queda_minima_pontos: 2
+    semana2_queda_minima_pct: 30
+    semana4_dor_maxima: 3     # nota >= 4 na semana 4 -> saída 2
+    semana4_limita_trabalho: true
+    semana6_limite: true
+    crises_12_meses: 3
+
+# Regiões em que a saída 1 é possível: só as que têm exercícios gerais no catálogo.
+# Outras regiões caem na regra final (saída 2), pela D1. TODO(D5): ampliar catálogo e lista.
+regioes_saida1: [lombar, pescoco, ombros, costas_alta, punhos_maos]
+regioes_coluna: [lombar, pescoco, costas_alta]
+
+perguntas:
+  - id: regiao
+    tipo: mapa_corpo
+  - id: duracao
+    tipo: duracao
+  - id: dor_nota
+    tipo: escala_0_10
+    texto: "De 0 a 10, quanto dói agora?"
+
+# Perguntas de alerta. Sempre perguntadas, nunca puladas (R4).
+# São agrupadas em frase corrida, no máximo 3 mensagens por região. Itens repetidos entre grupos
+# são perguntados uma vez só.
+perguntas_alerta:
+  - id: alerta_cardiaco
+    regioes: [ombros, costas_alta]
+    sinal_de_alerta: true
+    texto: alerta.cardiaco
+    itens:
+      - { achado: peito, pergunta_unica: alerta.unica.peito }
+  - id: alerta_neuro_lombar
+    regioes: [lombar]
+    sinal_de_alerta: true
+    texto: alerta.neuro_lombar
+    itens:
+      - { achado: urina, pergunta_unica: alerta.unica.urina }
+      - { achado: sela, pergunta_unica: alerta.unica.sela }
+      - { achado: forca_pernas, pergunta_unica: alerta.unica.forca_pernas }
+  - id: alerta_neuro_pescoco
+    regioes: [pescoco]
+    sinal_de_alerta: true
+    texto: alerta.neuro_pescoco
+    itens:
+      - { achado: bracos_ambos, pergunta_unica: alerta.unica.bracos_ambos }
+      - { achado: equilibrio_maos, pergunta_unica: alerta.unica.equilibrio_maos }
+      - { achado: neuro_central, pergunta_unica: alerta.unica.neuro_central }
+  - id: alerta_sistemico_coluna
+    regioes: [lombar, costas_alta]
+    sinal_de_alerta: true
+    texto: alerta.sistemico_coluna
+    itens:
+      - { achado: cancer, pergunta_unica: alerta.unica.cancer }
+      - { achado: peso, pergunta_unica: alerta.unica.peso }
+      - { achado: febre, pergunta_unica: alerta.unica.febre }
+      - { achado: corticoide, pergunta_unica: alerta.unica.corticoide }
+  - id: alerta_sistemico_geral
+    regioes: [pescoco, ombros, cotovelos, punhos_maos, quadril, joelhos, tornozelos_pes]
+    sinal_de_alerta: true
+    texto: alerta.sistemico_geral
+    itens:
+      - { achado: cancer, pergunta_unica: alerta.unica.cancer }
+      - { achado: peso, pergunta_unica: alerta.unica.peso }
+      - { achado: febre, pergunta_unica: alerta.unica.febre }
+  # Este grupo junta o último sinal de alerta da lombar com as perguntas de caso complexo,
+  # para caber na meta M5 (≤ 15 perguntas).
+  - id: mecanico_lombar
+    regioes: [lombar]
+    sinal_de_alerta: true
+    texto: alerta.mecanico_lombar
+    itens:
+      - { achado: trauma, pergunta_unica: alerta.unica.trauma }
+      - { achado: noturna, pergunta_unica: alerta.unica.noturna }
+      - { achado: piora_rapida, pergunta_unica: alerta.unica.piora_rapida }
+      - { achado: nao_mexe, pergunta_unica: alerta.unica.nao_mexe }
+  - id: mecanico_geral
+    regioes: [pescoco, ombros, costas_alta, cotovelos, punhos_maos, quadril, joelhos, tornozelos_pes]
+    sinal_de_alerta: true
+    texto: alerta.mecanico_geral
+    itens:
+      - { achado: trauma, pergunta_unica: alerta.unica.trauma }
+      - { achado: piora_rapida, pergunta_unica: alerta.unica.piora_rapida }
+      - { achado: nao_mexe, pergunta_unica: alerta.unica.nao_mexe }
+
+regras:
+  # 1. Sinais de alerta -> saída 3 + "vá hoje" (D2)
+  - id: RF-PEITO-EMERGENCIA
+    quando: { qualquer: [peito] }
+    saida: 3
+    urgente_hoje: true
+    emergencia: true
+    porque: porque.saida3.peito
+  - id: RF-CAUDA-EQUINA
+    quando: { qualquer: [urina, sela, forca_pernas] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.cauda_equina
+  - id: RF-NEURO-CERVICAL
+    quando: { qualquer: [bracos_ambos, equilibrio_maos, neuro_central] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.neuro_cervical
+  - id: RF-TRAUMA-COLUNA
+    quando: { qualquer: [trauma], regiao_em: [lombar, pescoco, costas_alta] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.trauma_coluna
+  - id: RF-SISTEMICO
+    quando: { qualquer: [cancer, peso, febre] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.sistemico
+  - id: RF-DOR-NOTURNA
+    quando: { qualquer: [noturna] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.noturna
+  - id: RF-FRATURA-FRAGILIDADE
+    quando: { qualquer: [corticoide] }
+    saida: 3
+    urgente_hoje: true
+    porque: porque.saida3.fragilidade
+
+  # 2. Caso complexo sem alerta -> saída 3
+  - id: CX-DOR-FORTE
+    quando: { dor_nota_gte: $cortes.dor_forte_minima }
+    saida: 3
+    porque: porque.saida3.dor_forte
+  - id: CX-TRAUMA
+    quando: { qualquer: [trauma] }
+    saida: 3
+    porque: porque.saida3.trauma
+  - id: CX-PIORA-RAPIDA
+    quando: { qualquer: [piora_rapida] }
+    saida: 3
+    porque: porque.saida3.piora_rapida
+  - id: CX-NAO-MEXE
+    quando: { qualquer: [nao_mexe] }
+    saida: 3
+    porque: porque.saida3.nao_mexe
+
+  # 3. STarT Back médio ou alto -> saída 2 (D9)
+  - id: S2-STARTBACK
+    quando: { start_back_em: $cortes.start_back_saida2 }
+    saida: 2
+    porque: porque.saida2.startback
+
+  # 4. Transbordo da D3 e recorrência -> saída 2
+  - id: S2-D3-SEMANA1-PIOROU
+    habilitada: $cortes.d3.semana1_piorou
+    quando: { checagem_piorou: { semana: 1 } }
+    saida: 2
+    porque: porque.saida2.semana1
+  - id: S2-D3-SEMANA2-SEM-QUEDA
+    quando:
+      checagem_queda_insuficiente:
+        semana: 2
+        pontos: $cortes.d3.semana2_queda_minima_pontos
+        pct: $cortes.d3.semana2_queda_minima_pct
+    saida: 2
+    porque: porque.saida2.semana2
+  - id: S2-D3-SEMANA4-DOR
+    quando: { checagem_dor_gt: { semana: 4, valor: $cortes.d3.semana4_dor_maxima } }
+    saida: 2
+    porque: porque.saida2.semana4
+  - id: S2-D3-SEMANA4-TRABALHO
+    habilitada: $cortes.d3.semana4_limita_trabalho
+    quando: { checagem_limita_trabalho: { semana: 4 } }
+    saida: 2
+    porque: porque.saida2.semana4
+  - id: S2-D3-SEMANA6
+    habilitada: $cortes.d3.semana6_limite
+    quando: { checagem_nao_recuperado: { semana: 6 } }
+    saida: 2
+    porque: porque.saida2.semana6
+  - id: S2-RECORRENCIA
+    quando: { crises_12m_gte: $cortes.d3.crises_12_meses }
+    saida: 2
+    porque: porque.saida2.recorrencia
+
+  # 5. Dor leve e recente, STarT baixo, nada acima -> saída 1
+  - id: S1-AUTOCUIDADO
+    quando:
+      dor_nota_lte: $cortes.dor_leve_maxima
+      dias_lte: $cortes.dias_recente_max
+      start_back_em: [baixo]
+      regioes_todas_em: $regioes_saida1
+    saida: 1
+    porque: porque.saida1.autocuidado
+
+  # 6. Nenhuma regra casou -> saída 2 (D1)
+  - id: S2-SEM-REGRA
+    quando: { sempre: true }
+    saida: 2
+    porque: porque.saida2.sem_regra

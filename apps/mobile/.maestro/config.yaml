@@ -1,0 +1,4 @@
+# Fluxos de ponta a ponta (Maestro) no emulador Android. pnpm e2e roda todos.
+# Precisam de: API no ar (pnpm demo) e build de desenvolvimento instalado (appId abaixo).
+flows:
+  - "0*.yaml"

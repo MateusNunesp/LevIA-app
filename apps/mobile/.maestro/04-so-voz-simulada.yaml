@@ -1,0 +1,12 @@
+appId: br.com.levia.app
+name: Modo só voz (simulado)
+# O Maestro não injeta áudio. Este fluxo liga o modo só voz e confere que o microfone está acessível;
+# a fala é simulada pelo bench (`bench:conversa` com mensagens {"voz": "..."}) e testada à mão no aparelho.
+---
+- launchApp
+- tapOn: "Você"
+- tapOn: "Modo só voz"
+- tapOn: "Conversa"
+- assertVisible: "Gravar mensagem de voz"
+- tapOn: "Você"
+- tapOn: "Modo só voz"

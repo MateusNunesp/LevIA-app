@@ -1,0 +1,18 @@
+appId: br.com.levia.app
+name: Checagem semanal na conversa (perfil demo Ana)
+# A API precisa estar com LEVIA_HOJE 7 dias depois do episódio da Ana no seed (seed em 2026-11-08 -> LEVIA_HOJE=2026-11-12).
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: "Você"
+- scrollUntilVisible: { element: "Funcionária \\(Ana\\)", direction: DOWN }
+- tapOn: "Funcionária \\(Ana\\)"
+- assertVisible: ".*pergunta rápida da semana 1.*"
+- runFlow: { file: _responder.yaml, env: { T: "2" } }
+- runFlow: { file: _responder.yaml, env: { T: "nao" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- assertVisible: "Entendi: nota 2, não atrapalha o trabalho.*"
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Que bom. Siga com os exercícios.*"

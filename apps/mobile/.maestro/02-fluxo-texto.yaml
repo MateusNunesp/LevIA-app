@@ -1,0 +1,24 @@
+appId: br.com.levia.app
+name: Fluxo completo só por texto, sem nenhum botão de resposta
+---
+- launchApp
+- tapOn: "Mensagem"
+- inputText: "dói a lombar"
+- tapOn: "Enviar"
+- assertVisible: "Faz quanto tempo que dói?"
+- runFlow: { file: _responder.yaml, env: { T: "uns 3 dias" } }
+- runFlow: { file: _responder.yaml, env: { T: "4" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- repeat:
+    times: 8
+    commands:
+      - runFlow: { file: _responder.yaml, env: { T: "discordo" } }
+- runFlow: { file: _responder.yaml, env: { T: "pouco" } }
+- assertVisible: "Entendi: dor na lombar há 3 dias, nota 4.*"
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Dá para cuidar em casa"
+# o app fecha o teclado sozinho quando chega o resultado
+- tapOn: "Por quê?"
+- scrollUntilVisible: { element: "Sua dor é leve.*", direction: DOWN, speed: 15, visibilityPercentage: 60 }

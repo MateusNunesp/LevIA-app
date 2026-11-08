@@ -1,0 +1,1074 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LevIA API",
+    "version": "0.1.0",
+    "description": "Só API (sem páginas web). O RH só recebe agregados."
+  },
+  "paths": {
+    "/v1/dispositivos": {
+      "post": {
+        "summary": "Registra o identificador provisório do aparelho",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/consentimentos": {
+      "post": {
+        "summary": "Dá um consentimento",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "triagem",
+                      "ritmo"
+                    ]
+                  },
+                  "versao": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "tipo",
+                  "versao"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/consentimentos/{tipo}": {
+      "delete": {
+        "summary": "Revoga um consentimento (triagem: apaga dados de saúde)",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/sessoes": {
+      "post": {
+        "summary": "Começa uma conversa",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "texto"
+                              },
+                              "textoId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "textoId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "cartao_mapa"
+                              },
+                              "textoId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "textoId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "resultado"
+                              },
+                              "saida": {
+                                "anyOf": [
+                                  {
+                                    "type": "number",
+                                    "const": 1
+                                  },
+                                  {
+                                    "type": "number",
+                                    "const": 2
+                                  },
+                                  {
+                                    "type": "number",
+                                    "const": 3
+                                  }
+                                ]
+                              },
+                              "urgenteHoje": {
+                                "type": "boolean"
+                              },
+                              "titulo": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              },
+                              "porque": {
+                                "type": "string"
+                              },
+                              "episodioId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "saida",
+                              "urgenteHoje",
+                              "titulo",
+                              "texto",
+                              "porque",
+                              "episodioId"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "resumo"
+                              },
+                              "episodioId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "episodioId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "exercicio"
+                              },
+                              "exercicioId": {
+                                "type": "string"
+                              },
+                              "nome": {
+                                "type": "string"
+                              },
+                              "passos": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "dose": {
+                                "type": "string"
+                              },
+                              "quandoParar": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "exercicioId",
+                              "nome",
+                              "passos",
+                              "dose",
+                              "quandoParar"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "emergencia"
+                              },
+                              "motivo": {
+                                "type": "string",
+                                "enum": [
+                                  "cardiaca",
+                                  "avc",
+                                  "autolesao",
+                                  "alerta"
+                                ]
+                              },
+                              "texto": {
+                                "type": "string"
+                              },
+                              "telefones": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "motivo",
+                              "texto",
+                              "telefones"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "mensagens"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessoes/{id}/mensagens": {
+      "post": {
+        "summary": "Envia texto, transcrição ou regiões do mapa",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "texto"
+                              },
+                              "textoId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "textoId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "cartao_mapa"
+                              },
+                              "textoId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "textoId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "resultado"
+                              },
+                              "saida": {
+                                "anyOf": [
+                                  {
+                                    "type": "number",
+                                    "const": 1
+                                  },
+                                  {
+                                    "type": "number",
+                                    "const": 2
+                                  },
+                                  {
+                                    "type": "number",
+                                    "const": 3
+                                  }
+                                ]
+                              },
+                              "urgenteHoje": {
+                                "type": "boolean"
+                              },
+                              "titulo": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              },
+                              "porque": {
+                                "type": "string"
+                              },
+                              "episodioId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "saida",
+                              "urgenteHoje",
+                              "titulo",
+                              "texto",
+                              "porque",
+                              "episodioId"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "resumo"
+                              },
+                              "episodioId": {
+                                "type": "string"
+                              },
+                              "texto": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "episodioId",
+                              "texto"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "exercicio"
+                              },
+                              "exercicioId": {
+                                "type": "string"
+                              },
+                              "nome": {
+                                "type": "string"
+                              },
+                              "passos": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "dose": {
+                                "type": "string"
+                              },
+                              "quandoParar": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "exercicioId",
+                              "nome",
+                              "passos",
+                              "dose",
+                              "quandoParar"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "const": "emergencia"
+                              },
+                              "motivo": {
+                                "type": "string",
+                                "enum": [
+                                  "cardiaca",
+                                  "avc",
+                                  "autolesao",
+                                  "alerta"
+                                ]
+                              },
+                              "texto": {
+                                "type": "string"
+                              },
+                              "telefones": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "motivo",
+                              "texto",
+                              "telefones"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "terminada": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "mensagens",
+                    "terminada"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessoes/{id}/confirmar": {
+      "post": {
+        "summary": "Atalho para confirmar",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu/plano": {
+      "get": {
+        "summary": "Plano de exercícios",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu/registros": {
+      "post": {
+        "summary": "Registra exercício do plano",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu/checagens": {
+      "post": {
+        "summary": "Começa a checagem pendente",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu/resumos/{episodioId}": {
+      "get": {
+        "summary": "Dados e HTML do resumo (PDF é feito no aparelho)",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu/dados": {
+      "get": {
+        "summary": "Baixar meus dados",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/eu": {
+      "delete": {
+        "summary": "Apagar tudo",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/ritmo/entrar": {
+      "post": {
+        "summary": "Entra no Ritmo",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/ritmo/sair": {
+      "post": {
+        "summary": "Sai do Ritmo",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/ritmo/placar": {
+      "get": {
+        "summary": "Placar por equipe (só equipes >= 5)",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/rh/agregados": {
+      "get": {
+        "summary": "Agregados setor x mês, k >= 10",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "celulas": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "setor": {
+                            "type": "string"
+                          },
+                          "mes": {
+                            "type": "string"
+                          },
+                          "indicador": {
+                            "type": "string",
+                            "enum": [
+                              "pessoas_ativas",
+                              "saida_1",
+                              "saida_2",
+                              "saida_3",
+                              "regiao_pescoco",
+                              "regiao_ombros",
+                              "regiao_costas_alta",
+                              "regiao_lombar",
+                              "regiao_cotovelos",
+                              "regiao_punhos_maos",
+                              "regiao_quadril",
+                              "regiao_joelhos",
+                              "regiao_tornozelos_pes",
+                              "ritmo_constancia_pct"
+                            ]
+                          },
+                          "valor": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "suprimido": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "setor",
+                          "mes",
+                          "indicador",
+                          "valor",
+                          "suprimido"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "aviso": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "celulas",
+                    "aviso"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rh/nr1.csv": {
+      "get": {
+        "summary": "Relatório NR-1 (CSV agregado)",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/rh/nr1.pdf": {
+      "get": {
+        "summary": "Relatório NR-1 (PDF agregado)",
+        "parameters": [
+          {
+            "name": "x-levia-dispositivo",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador provisório do aparelho. TODO(login)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/bench/triage": {
+      "post": {
+        "summary": "Só com LEVIA_MODE=bench",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "respostas": {
+                    "type": "object",
+                    "properties": {
+                      "regioes": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "pescoco",
+                            "ombros",
+                            "costas_alta",
+                            "lombar",
+                            "cotovelos",
+                            "punhos_maos",
+                            "quadril",
+                            "joelhos",
+                            "tornozelos_pes"
+                          ]
+                        }
+                      },
+                      "duracaoDias": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "dorNota": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10
+                      },
+                      "achados": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "boolean"
+                        }
+                      },
+                      "startBack": {
+                        "minItems": 9,
+                        "maxItems": 9,
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    "required": [
+                      "regioes",
+                      "duracaoDias",
+                      "dorNota",
+                      "achados",
+                      "startBack"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "historico": {},
+                  "hoje": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "respostas"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/bench/conversa": {
+      "post": {
+        "summary": "Só com LEVIA_MODE=bench",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "mensagens": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "mapa": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "pescoco",
+                                  "ombros",
+                                  "costas_alta",
+                                  "lombar",
+                                  "cotovelos",
+                                  "punhos_maos",
+                                  "quadril",
+                                  "joelhos",
+                                  "tornozelos_pes"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "mapa"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "voz": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "voz"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "hoje": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "mensagens"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  }
+}

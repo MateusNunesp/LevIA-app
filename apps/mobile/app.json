@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "LevIA",
+    "slug": "levia",
+    "scheme": "levia",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#fbfaf7",
+    "android": {
+      "package": "br.com.levia.app",
+      "permissions": [
+        "RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#1f6f5c"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "br.com.levia.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "A LevIA usa o microfone só quando você toca para falar. O áudio não sai do celular.",
+        "NSSpeechRecognitionUsageDescription": "A LevIA transforma sua fala em texto no próprio celular, quando o sistema permite."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#1f6f5c"
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "A LevIA usa o microfone só quando você toca para falar.",
+          "speechRecognitionPermission": "A LevIA transforma sua fala em texto no próprio celular, quando o sistema permite.",
+          "androidSpeechServicePackages": [
+            "com.google.android.as",
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "apiUrl": null
+    }
+  }
+}

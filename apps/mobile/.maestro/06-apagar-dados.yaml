@@ -1,0 +1,10 @@
+appId: br.com.levia.app
+name: Apagar meus dados
+---
+- launchApp
+- tapOn: "Você"
+- scrollUntilVisible: { element: "Apagar tudo", direction: DOWN }
+- tapOn: "Apagar tudo"
+- assertVisible: "Apagar tudo?"
+- tapOn: "(?i)APAGAR TUDO"
+- assertVisible: "Antes de começar"

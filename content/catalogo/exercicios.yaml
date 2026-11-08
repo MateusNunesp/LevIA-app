@@ -1,0 +1,173 @@
+# Catálogo de exercícios gerais de autocuidado e pausa ativa.
+# RASCUNHO escrito pelo agente. TODO(D5): revisar cada exercício, dose e "quando parar".
+# Nada aqui é exercício terapêutico para uma dor específica.
+versao: 1
+status_revisao: precisa_de_revisao
+revisado_por: null
+revisado_em: null
+exercicios:
+  - id: EX-LOMBAR-JOELHO-PEITO
+    nome: "Abraço nos joelhos"
+    regioes: [lombar]
+    objetivo: "Soltar a parte de baixo das costas."
+    passos:
+      - "Deite de costas num lugar firme."
+      - "Dobre os joelhos com os pés no chão."
+      - "Puxe um joelho de cada vez para perto do peito."
+      - "Fique assim por 10 segundos, respirando devagar."
+      - "Volte devagar."
+    dose: { series: 2, repeticoes: 5, vezes_por_semana: 5, maximo_por_dia: 2 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-LOMBAR-GATO
+    nome: "Gato e vaca"
+    regioes: [lombar, costas_alta]
+    objetivo: "Mexer a coluna com calma."
+    passos:
+      - "Fique de quatro, com mãos e joelhos no chão."
+      - "Solte o ar e arredonde as costas para cima."
+      - "Puxe o ar e deixe a barriga descer devagar."
+      - "Vá e volte sem pressa."
+    dose: { series: 2, repeticoes: 8, vezes_por_semana: 5, maximo_por_dia: 2 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-LOMBAR-PONTE
+    nome: "Ponte"
+    regioes: [lombar]
+    objetivo: "Dar força leve ao quadril e às costas."
+    passos:
+      - "Deite de costas com os joelhos dobrados."
+      - "Aperte o bumbum e suba o quadril um pouco."
+      - "Fique 3 segundos lá em cima."
+      - "Desça devagar."
+    dose: { series: 2, repeticoes: 8, vezes_por_semana: 4, maximo_por_dia: 1 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-LOMBAR-CAMINHADA
+    nome: "Caminhada curta"
+    regioes: [lombar, costas_alta]
+    objetivo: "Ficar em movimento no dia a dia."
+    passos:
+      - "Caminhe num ritmo confortável."
+      - "Comece com 5 a 10 minutos."
+      - "Se estiver bem, aumente um pouco a cada dia."
+    dose: { series: 1, repeticoes: 1, vezes_por_semana: 7, maximo_por_dia: 2 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PESCOCO-SIM
+    nome: "Sim com a cabeça"
+    regioes: [pescoco]
+    objetivo: "Mexer o pescoço com calma."
+    passos:
+      - "Sente com as costas retas."
+      - "Leve o queixo devagar em direção ao peito."
+      - "Volte e olhe um pouco para cima, sem forçar."
+      - "Faça devagar, sem dor forte."
+    dose: { series: 2, repeticoes: 8, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PESCOCO-NAO
+    nome: "Não com a cabeça"
+    regioes: [pescoco]
+    objetivo: "Mexer o pescoço para os lados."
+    passos:
+      - "Sente com as costas retas."
+      - "Vire a cabeça devagar para um lado, como quem diz não."
+      - "Volte ao meio e vire para o outro lado."
+    dose: { series: 2, repeticoes: 8, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PESCOCO-QUEIXO
+    nome: "Queixo para trás"
+    regioes: [pescoco]
+    objetivo: "Ajudar a postura da cabeça."
+    passos:
+      - "Sente olhando para a frente."
+      - "Leve o queixo para trás, como se fizesse papada."
+      - "Fique 3 segundos."
+      - "Solte devagar."
+    dose: { series: 2, repeticoes: 6, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-OMBRO-CIRCULOS
+    nome: "Círculos com os ombros"
+    regioes: [ombros, pescoco, costas_alta]
+    objetivo: "Soltar os ombros numa pausa do trabalho."
+    passos:
+      - "Deixe os braços soltos ao lado do corpo."
+      - "Faça círculos com os ombros para trás."
+      - "Depois faça para a frente."
+    dose: { series: 2, repeticoes: 10, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-OMBRO-PENDULO
+    nome: "Pêndulo"
+    regioes: [ombros]
+    objetivo: "Mexer o ombro sem esforço."
+    passos:
+      - "Apoie uma mão numa mesa e incline o corpo um pouco."
+      - "Deixe o outro braço solto para baixo."
+      - "Balance o braço devagar, em pequenos círculos."
+      - "Troque de lado."
+    dose: { series: 2, repeticoes: 10, vezes_por_semana: 5, maximo_por_dia: 2 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-COSTAS-ESCAPULAS
+    nome: "Juntar as escápulas"
+    regioes: [costas_alta, ombros]
+    objetivo: "Ativar os músculos entre os ombros."
+    passos:
+      - "Sente com as costas retas."
+      - "Puxe os ombros para trás, juntando as escápulas."
+      - "Fique 3 segundos."
+      - "Solte devagar."
+    dose: { series: 2, repeticoes: 8, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PUNHO-CIRCULOS
+    nome: "Círculos com os punhos"
+    regioes: [punhos_maos]
+    objetivo: "Soltar os punhos numa pausa do trabalho."
+    passos:
+      - "Estique os braços à frente."
+      - "Faça círculos com as mãos para um lado."
+      - "Depois para o outro lado."
+    dose: { series: 2, repeticoes: 10, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PUNHO-ABRIR-FECHAR
+    nome: "Abrir e fechar as mãos"
+    regioes: [punhos_maos]
+    objetivo: "Mexer os dedos e as mãos."
+    passos:
+      - "Feche a mão devagar, sem apertar forte."
+      - "Abra bem os dedos."
+      - "Repita com calma."
+    dose: { series: 2, repeticoes: 10, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao
+  - id: EX-PUNHO-ALONGAR
+    nome: "Alongar o antebraço"
+    regioes: [punhos_maos]
+    objetivo: "Alongar com calma a parte de baixo do braço."
+    passos:
+      - "Estique um braço à frente com a palma para cima."
+      - "Com a outra mão, puxe os dedos para baixo com cuidado."
+      - "Fique 10 segundos, sem dor forte."
+      - "Troque de lado."
+    dose: { series: 2, repeticoes: 3, vezes_por_semana: 5, maximo_por_dia: 3 }
+    quando_parar: "Se a dor aumentar, pare e responda a checagem."
+    midia: placeholder
+    status_revisao: precisa_de_revisao

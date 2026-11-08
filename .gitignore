@@ -1,0 +1,10 @@
+node_modules
+dist
+*.db
+*.db-*
+.expo
+apps/mobile/android
+apps/mobile/ios
+.env
+coverage
+.levia-chave-dev

@@ -1,0 +1,10 @@
+appId: br.com.levia.app
+name: Abre direto na conversa, com o mapa como primeira pergunta
+---
+- clearState
+- launchApp
+- assertVisible: "Antes de começar"
+- assertNotVisible: "Entrar"
+- tapOn: "Aceito"
+- assertVisible: ".*Toque no desenho onde dói.*"
+- assertVisible: "Abrir o mapa do corpo"
