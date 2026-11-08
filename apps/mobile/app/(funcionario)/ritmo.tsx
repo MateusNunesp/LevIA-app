@@ -7,6 +7,8 @@ import { Botao, Texto, espaco, fonte, tipo, useTema } from "@levia/ui";
 import { api, ErroApi, type Placar } from "../../src/api.ts";
 import { useSessao, useTexto } from "../../src/sessao.tsx";
 import { Bloco, Tela } from "../../src/Tela.tsx";
+import { MapaCalor } from "../../src/MapaCalor.tsx";
+import { USAR_ATIVIDADES_SIMULADAS, atividadesSimuladas } from "../../src/atividadesMock.ts";
 
 export default function Ritmo() {
   const t = useTema();
@@ -54,6 +56,16 @@ export default function Ritmo() {
 
   return (
     <Tela titulo="Ritmo" onAtualizar={carregar}>
+      {/* Depois de escolher o apelido, a primeira informação da aba é o mapa de calor das 2 últimas semanas
+          (só da própria pessoa). TODO(mock): por enquanto com dados simulados. */}
+      {placar?.participando && (
+        <Bloco>
+          <MapaCalor
+            dias={USAR_ATIVIDADES_SIMULADAS ? atividadesSimuladas(placar.hoje) : placar.minhasAtividades}
+            hoje={placar.hoje}
+          />
+        </Bloco>
+      )}
       <Texto>{tx("consentimento.ritmo.texto")}</Texto>
       {!placar?.participando ? (
         <Bloco>

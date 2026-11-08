@@ -504,6 +504,27 @@ export class Servico {
     return out;
   }
 
+  /**
+   * Atividades da própria pessoa nos últimos `dias` dias (o mais antigo primeiro), para o mapa de calor do Ritmo.
+   * quantidade = soma dos registros do dia; planoAtivo = false nos dias sem plano ou em pausa (D4/D6: neutros).
+   * Só vai para a própria pessoa: nunca para a equipe nem para o RH.
+   */
+  atividadesRecentes(dono: string, dias = 14): { dia: string; quantidade: number; planoAtivo: boolean }[] {
+    const hoje = this.relogio.hoje();
+    const planos = this.db.select().from(S.plano).where(eq(S.plano.idPseudonimo, dono)).all();
+    const porDia = new Map<string, number>();
+    for (const p of planos)
+      for (const r of this.db.select().from(S.registroExercicio).where(eq(S.registroExercicio.planoId, p.id)).all())
+        porDia.set(r.dia, (porDia.get(r.dia) ?? 0) + r.quantidade);
+    const out: { dia: string; quantidade: number; planoAtivo: boolean }[] = [];
+    for (let i = dias - 1; i >= 0; i--) {
+      const d = somarDias(hoje, -i);
+      const ativo = planos.some((p) => p.criadoEm <= d && (!p.pausadoEm || d < p.pausadoEm) && (!p.encerradoEm || d < p.encerradoEm));
+      out.push({ dia: d, quantidade: porDia.get(d) ?? 0, planoAtivo: ativo });
+    }
+    return out;
+  }
+
   placarRitmo(dono: string) {
     const eu = this.pessoa(dono);
     const p = this.db.select().from(S.pessoa).all();
@@ -526,6 +547,9 @@ export class Servico {
       equipes: placar(equipes, undefined, hoje).map((e) => ({ nome: e.nome, constancia: e.constancia, participantes: e.participantes, minha: e.setorId === eu.setorId })),
       // progresso individual: só para a própria pessoa
       meuProgresso: minha ? { diasCumpridos: minha.cumpridos, diasQueContam: minha.contam } : null,
+      // mapa de calor das 2 últimas semanas: só para a própria pessoa (participe ou não do Ritmo)
+      minhasAtividades: this.atividadesRecentes(dono, 14),
+      hoje,
       // apelidos da própria equipe, sem pontuação
       minhaEquipe: meu
         ? membros

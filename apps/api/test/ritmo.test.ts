@@ -114,6 +114,28 @@ describe("Ritmo: constância", () => {
     expect(eq.participantes).toBe(5);
     expect(eq.constancia).toBeNull();
   });
+  it("mapa de calor: 14 dias, somando as atividades de cada dia, só para a própria pessoa", async () => {
+    const ctx = montarTeste({ hoje: "2026-11-06" });
+    const a = await pessoa(ctx);
+    const b = await pessoa(ctx);
+    const plano = await comPlano(ctx, a.h);
+    const ex = plano.exercicios[0];
+    await ctx.app.inject({ method: "POST", url: "/v1/eu/registros", headers: a.h, payload: { exercicioId: ex.id, dia: "2026-11-06", quantidade: 1 } });
+    ctx.relogio.atual = "2026-11-08";
+    for (let i = 0; i < 2; i++)
+      await ctx.app.inject({ method: "POST", url: "/v1/eu/registros", headers: a.h, payload: { exercicioId: ex.id, dia: "2026-11-08", quantidade: 1 } });
+    const r = await placar(ctx, a.h);
+    expect(r.hoje).toBe("2026-11-08");
+    expect(r.minhasAtividades).toHaveLength(14);
+    expect(r.minhasAtividades[0].dia).toBe("2026-10-26");
+    expect(r.minhasAtividades.at(-1)).toEqual({ dia: "2026-11-08", quantidade: 2, planoAtivo: true });
+    expect(r.minhasAtividades.find((d: { dia: string }) => d.dia === "2026-11-06")).toEqual({ dia: "2026-11-06", quantidade: 1, planoAtivo: true });
+    expect(r.minhasAtividades.find((d: { dia: string }) => d.dia === "2026-11-01")).toEqual({ dia: "2026-11-01", quantidade: 0, planoAtivo: false });
+    // os dados de A não aparecem para B
+    const rb = await placar(ctx, b.h);
+    expect(rb.minhasAtividades.every((d: { quantidade: number }) => d.quantidade === 0)).toBe(true);
+  });
+
   it("apagar tudo tira a pessoa da equipe", async () => {
     const ctx = montarTeste();
     const a = await pessoa(ctx);

@@ -15,7 +15,10 @@ function urlBase(): string {
 export const API = urlBase();
 
 export class ErroApi extends Error {
-  constructor(public readonly status: number, public readonly codigo: string) {
+  constructor(
+    public readonly status: number,
+    public readonly codigo: string,
+  ) {
     super(codigo);
   }
 }
@@ -31,7 +34,10 @@ async function req<T>(metodo: string, caminho: string, corpo?: unknown): Promise
     r = await fetch(`${API}${caminho}`, {
       method: metodo,
       // content-type só quando há corpo: DELETE e POST sem corpo não podem dizer que mandam JSON.
-      headers: { ...(corpo === undefined ? {} : { "content-type": "application/json" }), ...(dispositivo ? { "x-levia-dispositivo": dispositivo } : {}) },
+      headers: {
+        ...(corpo === undefined ? {} : { "content-type": "application/json" }),
+        ...(dispositivo ? { "x-levia-dispositivo": dispositivo } : {}),
+      },
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
     });
   } catch {
@@ -48,7 +54,14 @@ export type EntradaMensagem = { tipo: "texto" | "voz"; texto: string } | { tipo:
 
 export interface Plano {
   status: "ativo" | "pausado" | "encerrado" | "nenhum";
-  exercicios: { id: string; nome: string; objetivo: string; passos: string[]; dose: { series: number; repeticoes: number; vezes_por_semana: number; maximo_por_dia: number }; quandoParar: string }[];
+  exercicios: {
+    id: string;
+    nome: string;
+    objetivo: string;
+    passos: string[];
+    dose: { series: number; repeticoes: number; vezes_por_semana: number; maximo_por_dia: number };
+    quandoParar: string;
+  }[];
   checagens: { semana: number; data: string }[];
   checagemPendente: { semana: number; data: string } | null;
   registrosHoje: { exercicioId: string; quantidade: number }[];
@@ -60,6 +73,9 @@ export interface Placar {
   equipes: { nome: string; constancia: number | null; participantes: number; minha: boolean }[];
   meuProgresso: { diasCumpridos: number; diasQueContam: number } | null;
   minhaEquipe: string[];
+  /** mapa de calor: 14 dias, o mais antigo primeiro (só da própria pessoa) */
+  minhasAtividades: { dia: string; quantidade: number; planoAtivo: boolean }[];
+  hoje: string;
 }
 
 export interface CelulaRh {
@@ -72,13 +88,30 @@ export interface CelulaRh {
 
 export const api = {
   textos: () => req<{ textos: Record<string, string>; revisaoPendente: boolean }>("GET", "/v1/textos"),
-  registrar: (id: string) => req<{ papel: "funcionario" | "rh"; novo: boolean; triagemAceita: boolean; ritmoAceito: boolean }>("POST", "/v1/dispositivos", { id }),
-  consentir: (tipo: "triagem" | "ritmo") => req<{ ok: true }>("POST", "/v1/consentimentos", { tipo, versao: 1 }),
+  registrar: (id: string) =>
+    req<{ papel: "funcionario" | "rh"; novo: boolean; triagemAceita: boolean; ritmoAceito: boolean }>(
+      "POST",
+      "/v1/dispositivos",
+      { id },
+    ),
+  consentir: (tipo: "triagem" | "ritmo") =>
+    req<{ ok: true }>("POST", "/v1/consentimentos", { tipo, versao: 1 }),
   revogar: (tipo: "triagem" | "ritmo") => req<{ ok: true }>("DELETE", `/v1/consentimentos/${tipo}`),
-  novaSessao: (modo: "autoanamnese" | "checagem" | "piora" = "autoanamnese") => req<{ id: string; mensagens: MensagemLevia[] }>("POST", "/v1/sessoes", { modo }),
-  enviar: (sessao: string, e: EntradaMensagem) => req<{ mensagens: MensagemLevia[]; terminada: boolean; novaSessaoId?: string }>("POST", `/v1/sessoes/${sessao}/mensagens`, e),
+  novaSessao: (modo: "autoanamnese" | "checagem" | "piora" = "autoanamnese") =>
+    req<{ id: string; mensagens: MensagemLevia[] }>("POST", "/v1/sessoes", { modo }),
+  enviar: (sessao: string, e: EntradaMensagem) =>
+    req<{ mensagens: MensagemLevia[]; terminada: boolean; novaSessaoId?: string }>(
+      "POST",
+      `/v1/sessoes/${sessao}/mensagens`,
+      e,
+    ),
   plano: () => req<Plano>("GET", "/v1/eu/plano"),
-  registrarExercicio: (exercicioId: string, dia: string) => req<{ aceito: boolean; motivo?: string }>("POST", "/v1/eu/registros", { exercicioId, dia, quantidade: 1 }),
+  registrarExercicio: (exercicioId: string, dia: string) =>
+    req<{ aceito: boolean; motivo?: string }>("POST", "/v1/eu/registros", {
+      exercicioId,
+      dia,
+      quantidade: 1,
+    }),
   resumo: (episodioId: string) => req<{ html: string }>("GET", `/v1/eu/resumos/${episodioId}`),
   meusDados: () => req<unknown>("GET", "/v1/eu/dados"),
   apagarTudo: () => req<{ ok: true }>("DELETE", "/v1/eu"),
