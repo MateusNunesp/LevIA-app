@@ -57,7 +57,7 @@ export interface Plano {
 export interface Placar {
   participando: boolean;
   apelido: string | null;
-  equipes: { nome: string; constancia: number; participantes: number; minha: boolean }[];
+  equipes: { nome: string; constancia: number | null; participantes: number; minha: boolean }[];
   meuProgresso: { diasCumpridos: number; diasQueContam: number } | null;
   minhaEquipe: string[];
 }
@@ -75,7 +75,7 @@ export const api = {
   registrar: (id: string) => req<{ papel: "funcionario" | "rh"; novo: boolean; triagemAceita: boolean; ritmoAceito: boolean }>("POST", "/v1/dispositivos", { id }),
   consentir: (tipo: "triagem" | "ritmo") => req<{ ok: true }>("POST", "/v1/consentimentos", { tipo, versao: 1 }),
   revogar: (tipo: "triagem" | "ritmo") => req<{ ok: true }>("DELETE", `/v1/consentimentos/${tipo}`),
-  novaSessao: (modo: "autoanamnese" | "checagem" = "autoanamnese") => req<{ id: string; mensagens: MensagemLevia[] }>("POST", "/v1/sessoes", { modo }),
+  novaSessao: (modo: "autoanamnese" | "checagem" | "piora" = "autoanamnese") => req<{ id: string; mensagens: MensagemLevia[] }>("POST", "/v1/sessoes", { modo }),
   enviar: (sessao: string, e: EntradaMensagem) => req<{ mensagens: MensagemLevia[]; terminada: boolean; novaSessaoId?: string }>("POST", `/v1/sessoes/${sessao}/mensagens`, e),
   plano: () => req<Plano>("GET", "/v1/eu/plano"),
   registrarExercicio: (exercicioId: string, dia: string) => req<{ aceito: boolean; motivo?: string }>("POST", "/v1/eu/registros", { exercicioId, dia, quantidade: 1 }),

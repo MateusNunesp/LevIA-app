@@ -1,0 +1,23 @@
+appId: br.com.levia.app
+name: RH - setores por mês (k >= 10) e CSV do NR-1
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: { text: "Você", optional: true }
+- scrollUntilVisible: { element: "RH", direction: DOWN }
+- tapOn: "RH"
+- assertVisible: "Visão geral"
+- tapOn: "Setores"
+- assertVisible: "Grupos com menos de 10 pessoas ficam ocultos."
+- tapOn: "out/2026"
+- assertVisible: "Pessoas ativas"
+- assertVisible: "TI"
+- assertVisible: ".*menos de 10.*"
+- tapOn: "Relatório NR-1"
+- tapOn: "Gerar CSV"
+- extendedWaitUntil: { notVisible: "Gerar CSV", timeout: 15000 }
+- back
+- assertVisible: "Relatório NR-1"
+- tapOn: "Visão geral"
+- scrollUntilVisible: { element: "Funcionária \\(Ana\\)", direction: DOWN }
+- tapOn: "Funcionária \\(Ana\\)"

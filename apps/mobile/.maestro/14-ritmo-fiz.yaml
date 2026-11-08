@@ -1,0 +1,19 @@
+appId: br.com.levia.app
+name: Ritmo - "Fiz!" conta no progresso e respeita a dose (perfil demo Ana)
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: { text: "Você", optional: true }
+- scrollUntilVisible: { element: "Funcionária \\(Ana\\)", direction: DOWN }
+- tapOn: "Funcionária \\(Ana\\)"
+- tapOn: "Exercícios"
+- assertVisible: "Hoje: .* de [0-9]+"
+# toca no primeiro "Fiz!" ainda ativo (os que chegaram ao máximo do dia viram "Feito hoje")
+- scrollUntilVisible: { element: { text: "Fiz!", enabled: true }, direction: DOWN }
+- tapOn: { text: "Fiz!", enabled: true }
+- assertVisible: "Registrado. Bom trabalho!"
+- tapOn: "Ritmo"
+- assertVisible: "Só você vê isto"
+- assertVisible: "Você fez exercícios em [0-9]+ de [0-9]+ dias? que contam?\\."
+- assertVisible: ".*Operações \\(sua equipe\\)"
+- scrollUntilVisible: { element: ".*Colega 1, Colega 2, .*", direction: DOWN }

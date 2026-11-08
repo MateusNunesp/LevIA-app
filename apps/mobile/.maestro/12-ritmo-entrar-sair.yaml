@@ -1,0 +1,25 @@
+appId: br.com.levia.app
+name: Ritmo - entrar, sair e entrar de novo no mesmo dia
+---
+- clearState
+- launchApp
+- tapOn: "Aceito"
+- evalScript: ${output.apelido = 'Teste ' + Math.floor(Math.random() * 90000 + 10000)}
+- tapOn: "Ritmo"
+- assertVisible: "Escolha um apelido"
+- tapOn: "Apelido para a sua equipe"
+- inputText: ${output.apelido}
+- hideKeyboard
+- tapOn: "Entrar no Ritmo"
+- assertVisible: "Só você vê isto"
+- assertVisible: "Seus dias começam a contar.*"
+- scrollUntilVisible: { element: "Sair do Ritmo", direction: DOWN }
+- assertVisible: ".*${output.apelido}.*"
+- tapOn: "Sair do Ritmo"
+- assertVisible: "Escolha um apelido"
+- tapOn: "Apelido para a sua equipe"
+- inputText: ${output.apelido}
+- hideKeyboard
+- tapOn: "Entrar no Ritmo"
+- assertVisible: "Só você vê isto"
+- assertNotVisible: "Não deu para entrar agora.*"

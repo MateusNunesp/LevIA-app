@@ -1,4 +1,4 @@
-// Sem tela de entrar (login fora do MVP): o app abre direto na Conversa.
+// Sem tela de entrar (login fora do MVP). O app abre no Início (decisão do time, no lugar da Conversa da 4.1).
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Redirect } from "expo-router";
@@ -17,5 +17,5 @@ export default function Inicio() {
         <Botao titulo="Tentar de novo" onPress={() => void s.recarregar()} />
       </View>
     );
-  return <Redirect href={s.papel === "rh" ? "/rh" : "/conversa"} />;
+  return <Redirect href={s.papel === "rh" ? "/rh" : "/inicio"} />;
 }

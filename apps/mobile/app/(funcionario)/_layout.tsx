@@ -2,14 +2,59 @@ import React from "react";
 import { Tabs } from "expo-router";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { fonte, useTema } from "@levia/ui";
+import { Consentimento } from "../../src/Consentimento.tsx";
 
 function Icone({ nome, cor }: { nome: string; cor: string }) {
   return (
     <Svg width={26} height={26} viewBox="0 0 24 24">
-      {nome === "conversa" && <Path d="M4 5h16v11H9l-5 4z" fill="none" stroke={cor} strokeWidth={2} strokeLinejoin="round" />}
-      {nome === "exercicios" && <><Circle cx={12} cy={5} r={2.5} fill={cor} /><Path d="M5 10l7 1 7-1M12 11v5l-3 5M12 16l3 5" stroke={cor} strokeWidth={2} fill="none" strokeLinecap="round" /></>}
-      {nome === "ritmo" && <Path d="M3 13h4l2-6 4 12 2-6h6" stroke={cor} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
-      {nome === "voce" && <><Circle cx={12} cy={8} r={4} fill="none" stroke={cor} strokeWidth={2} /><Rect x={4} y={15} width={16} height={6} rx={3} fill="none" stroke={cor} strokeWidth={2} /></>}
+      {nome === "inicio" && (
+        <Path
+          d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"
+          fill="none"
+          stroke={cor}
+          strokeWidth={2}
+          strokeLinejoin="round"
+        />
+      )}
+      {nome === "conversa" && (
+        <Path d="M4 5h16v11H9l-5 4z" fill="none" stroke={cor} strokeWidth={2} strokeLinejoin="round" />
+      )}
+      {nome === "exercicios" && (
+        <>
+          <Circle cx={12} cy={5} r={2.5} fill={cor} />
+          <Path
+            d="M5 10l7 1 7-1M12 11v5l-3 5M12 16l3 5"
+            stroke={cor}
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+          />
+        </>
+      )}
+      {nome === "ritmo" && (
+        <Path
+          d="M3 13h4l2-6 4 12 2-6h6"
+          stroke={cor}
+          strokeWidth={2}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+      {nome === "rh" && (
+        <>
+          <Rect x={3} y={3} width={8} height={8} rx={2} fill="none" stroke={cor} strokeWidth={2} />
+          <Rect x={13} y={3} width={8} height={5} rx={2} fill="none" stroke={cor} strokeWidth={2} />
+          <Rect x={13} y={10} width={8} height={11} rx={2} fill="none" stroke={cor} strokeWidth={2} />
+          <Rect x={3} y={13} width={8} height={8} rx={2} fill="none" stroke={cor} strokeWidth={2} />
+        </>
+      )}
+      {nome === "voce" && (
+        <>
+          <Circle cx={12} cy={8} r={4} fill="none" stroke={cor} strokeWidth={2} />
+          <Rect x={4} y={15} width={16} height={6} rx={3} fill="none" stroke={cor} strokeWidth={2} />
+        </>
+      )}
     </Svg>
   );
 }
@@ -22,21 +67,30 @@ export default function Abas() {
     tabBarIcon: ({ color }: { color: unknown }) => <Icone nome={nome} cor={String(color)} />,
   });
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: t.primaria,
-        tabBarInactiveTintColor: t.textoSuave,
-        tabBarStyle: { backgroundColor: t.superficie, borderTopColor: t.borda, minHeight: 60 },
-        tabBarLabelStyle: { fontFamily: fonte.regular, fontSize: 13 },
-        tabBarAllowFontScaling: true,
-      }}
-    >
-      <Tabs.Screen name="conversa" options={aba("conversa", "Conversa")} />
-      <Tabs.Screen name="exercicios" options={aba("exercicios", "Exercícios")} />
-      <Tabs.Screen name="ritmo" options={aba("ritmo", "Ritmo")} />
-      <Tabs.Screen name="voce" options={aba("voce", "Você")} />
-    </Tabs>
+    <>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarHideOnKeyboard: true,
+          tabBarActiveTintColor: t.primaria,
+          tabBarInactiveTintColor: t.textoSuave,
+          tabBarStyle: { backgroundColor: t.superficie, borderTopColor: t.borda, minHeight: 60 },
+          // 6 abas: sem recuo lateral e com 12 pt, para "Exercícios" caber inteiro na largura de cada aba
+          tabBarItemStyle: { paddingHorizontal: 0 },
+          tabBarLabelStyle: { fontFamily: fonte.regular, fontSize: 12 },
+          tabBarAllowFontScaling: true,
+        }}
+      >
+        <Tabs.Screen name="inicio" options={aba("inicio", "Início")} />
+        <Tabs.Screen name="conversa" options={aba("conversa", "Conversa")} />
+        <Tabs.Screen name="exercicios" options={aba("exercicios", "Exercícios")} />
+        <Tabs.Screen name="ritmo" options={aba("ritmo", "Ritmo")} />
+        <Tabs.Screen name="voce" options={aba("voce", "Você")} />
+        {/* Aba do RH: por enquanto aparece para todos (decisão do time). Só mostra agregados (k >= 10). TODO(login). */}
+        <Tabs.Screen name="rh" options={aba("rh", "RH")} />
+      </Tabs>
+      {/* folha de consentimento do primeiro uso, uma só para todas as abas */}
+      <Consentimento />
+    </>
   );
 }

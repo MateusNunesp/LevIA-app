@@ -17,6 +17,7 @@ import {
   type Estado,
 } from "@levia/conversation";
 import { NluIndisponivel, type NluProvider } from "@levia/nlu";
+import { iniciarPiora } from "@levia/conversation";
 import { placar, validarRegistro, constanciaPessoa, type DiaPessoa } from "@levia/ritmo";
 import type { FonteRh } from "@levia/privacy";
 import { triage } from "@levia/triage";
@@ -112,7 +113,13 @@ export class Servico {
 
   consentir(id: string, tipo: "triagem" | "ritmo", versao: number): void {
     if (this.consentimentoAtivo(id, tipo)) return;
-    this.db.insert(S.consentimento).values({ idPseudonimo: id, tipo, versaoTexto: versao, dadoEm: this.relogio.agora() }).run();
+    // Dar de novo no mesmo instante de uma revogação reaproveita a linha (a chave é pessoa + tipo + data).
+    this.db.$client
+      .prepare(
+        `INSERT INTO consentimento (id_pseudonimo, tipo, versao_texto, dado_em) VALUES (?, ?, ?, ?)
+         ON CONFLICT(id_pseudonimo, tipo, dado_em) DO UPDATE SET revogado_em = NULL, versao_texto = excluded.versao_texto`,
+      )
+      .run(id, tipo, versao, this.relogio.agora());
     this.log({ evento: "consentimento", tipo });
   }
 
@@ -146,10 +153,25 @@ export class Servico {
     if (!this.consentimentoAtivo(id, "triagem")) throw new ErroHttp(403, "consentimento_triagem_ausente");
   }
 
-  novaSessao(dono: string, modo: "autoanamnese" | "checagem" = "autoanamnese"): { id: string; mensagens: MensagemLevia[] } {
+  novaSessao(dono: string, modo: "autoanamnese" | "checagem" | "piora" = "autoanamnese"): { id: string; mensagens: MensagemLevia[] } {
     this.exigirTriagem(dono);
     this.tocarUso(dono);
     const id = randomUUID();
+    if (modo === "piora") {
+      // D3: "qualquer dia, piora forte ou sinal novo -> a árvore reavalia". Com plano ativo, checagem extra agora
+      // (nota, trabalho e sinais de alerta de novo); sem plano, uma autoanamnese nova.
+      const p = this.planoAtivo(dono);
+      if (p) {
+        const s = iniciarChecagem(this.ctx, this.episodio(dono, p.episodioId).regioes, 0);
+        this.salvarSessao(id, dono, "checagem", s.estado, { episodioId: p.episodioId });
+        this.log({ evento: "sessao_iniciada", modo: "piora_checagem" });
+        return { id, mensagens: s.mensagens };
+      }
+      const s = iniciarPiora(this.ctx);
+      this.salvarSessao(id, dono, "autoanamnese", s.estado);
+      this.log({ evento: "sessao_iniciada", modo: "piora_nova" });
+      return { id, mensagens: s.mensagens };
+    }
     if (modo === "checagem") {
       const pend = this.checagemPendente(dono);
       if (!pend) throw new ErroHttp(409, "sem_checagem_pendente");
@@ -337,8 +359,12 @@ export class Servico {
       return montarResultado(r, this.conteudo, { episodioId, regioes: ep.regioes }).mensagens;
     }
     const lista = plano ? (JSON.parse(plano.checagens) as { semana: Semana; data: string }[]) : [];
-    const feitas = new Set(historico.checagens.map((c) => c.semana));
+    const feitas = new Set<number>(historico.checagens.map((c) => c.semana));
     const prox = lista.find((c) => !feitas.has(c.semana));
+    if (ch.semana === 0) {
+      // checagem extra: o plano segue; a agenda das semanas 1, 2, 4 e 6 não muda
+      return [{ tipo: "texto", textoId: "piora.continua", texto: tx(this.conteudo.textos, "piora.continua") }];
+    }
     if (!prox && plano) {
       this.db.update(S.plano).set({ status: "encerrado", encerradoEm: this.relogio.hoje() }).where(eq(S.plano.id, plano.id)).run();
       return [{ tipo: "texto", textoId: "checagem.fim", texto: tx(this.conteudo.textos, "checagem.fim") }];
@@ -431,12 +457,31 @@ export class Servico {
   entrarRitmo(dono: string, apelido: string): void {
     if (!this.consentimentoAtivo(dono, "ritmo")) throw new ErroHttp(403, "consentimento_ritmo_ausente");
     const p = this.pessoa(dono);
-    const ja = this.db.select().from(S.ritmoMembro).where(and(eq(S.ritmoMembro.idPseudonimo, dono), isNull(S.ritmoMembro.saiuEm))).get();
+    // Apelido único dentro da equipe (sem diferença de maiúsculas e acentos), para ninguém ser confundido.
+    const chave = (a: string) => a.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+    const colegas = this.db.select().from(S.ritmoMembro).where(and(eq(S.ritmoMembro.setorId, p.setorId), isNull(S.ritmoMembro.saiuEm))).all();
+    if (colegas.some((m) => m.idPseudonimo !== dono && chave(m.apelido) === chave(apelido))) throw new ErroHttp(409, "apelido_em_uso");
+    const ja = colegas.find((m) => m.idPseudonimo === dono);
     if (ja) {
       this.db.update(S.ritmoMembro).set({ apelido }).where(and(eq(S.ritmoMembro.idPseudonimo, dono), isNull(S.ritmoMembro.saiuEm))).run();
       return;
     }
-    this.db.insert(S.ritmoMembro).values({ setorId: p.setorId, idPseudonimo: dono, apelido, entrouEm: this.relogio.hoje() }).run();
+    const hoje = this.relogio.hoje();
+    const deHoje = this.db
+      .select()
+      .from(S.ritmoMembro)
+      .where(and(eq(S.ritmoMembro.idPseudonimo, dono), eq(S.ritmoMembro.setorId, p.setorId), eq(S.ritmoMembro.entrouEm, hoje)))
+      .get();
+    if (deHoje) {
+      // saiu e voltou no mesmo dia: reabre a mesma participação (a chave é setor + pessoa + data de entrada)
+      this.db
+        .update(S.ritmoMembro)
+        .set({ apelido, saiuEm: null })
+        .where(and(eq(S.ritmoMembro.idPseudonimo, dono), eq(S.ritmoMembro.setorId, p.setorId), eq(S.ritmoMembro.entrouEm, hoje)))
+        .run();
+      return;
+    }
+    this.db.insert(S.ritmoMembro).values({ setorId: p.setorId, idPseudonimo: dono, apelido, entrouEm: hoje }).run();
   }
 
   sairRitmo(dono: string): void {
@@ -472,16 +517,22 @@ export class Servico {
         .map((m) => this.diasRitmo(m.idPseudonimo, m.entrouEm)),
     }));
     const meu = membros.find((m) => m.idPseudonimo === dono);
-    const minha = meu ? constanciaPessoa(this.diasRitmo(dono, meu.entrouEm)) : null;
+    const hoje = this.relogio.hoje();
+    const minha = meu ? constanciaPessoa(this.diasRitmo(dono, meu.entrouEm), hoje) : null;
     return {
       participando: !!meu,
       apelido: meu?.apelido ?? null,
       // só equipes (D6); equipes < 5 não aparecem (D11)
-      equipes: placar(equipes).map((e) => ({ nome: e.nome, constancia: e.constancia, participantes: e.participantes, minha: e.setorId === eu.setorId })),
+      equipes: placar(equipes, undefined, hoje).map((e) => ({ nome: e.nome, constancia: e.constancia, participantes: e.participantes, minha: e.setorId === eu.setorId })),
       // progresso individual: só para a própria pessoa
       meuProgresso: minha ? { diasCumpridos: minha.cumpridos, diasQueContam: minha.contam } : null,
       // apelidos da própria equipe, sem pontuação
-      minhaEquipe: meu ? membros.filter((m) => m.setorId === eu.setorId).map((m) => m.apelido).sort() : [],
+      minhaEquipe: meu
+        ? membros
+            .filter((m) => m.setorId === eu.setorId)
+            .map((m) => m.apelido)
+            .sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true, sensitivity: "base" }))
+        : [],
     };
   }
 
@@ -499,7 +550,7 @@ export class Servico {
         return membros
           .filter((m) => pessoas.some((p) => p.idPseudonimo === m.idPseudonimo))
           .map((m) => {
-            const c = constanciaPessoa(this.diasRitmo(m.idPseudonimo, m.entrouEm));
+            const c = constanciaPessoa(this.diasRitmo(m.idPseudonimo, m.entrouEm), this.relogio.hoje());
             return { pessoa: m.idPseudonimo, setorId: m.setorId, mes: mes(this.relogio.hoje()), constancia: c.contam ? c.cumpridos / c.contam : 0 };
           });
       },

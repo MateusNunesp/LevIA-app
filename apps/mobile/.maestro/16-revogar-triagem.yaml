@@ -1,0 +1,15 @@
+appId: br.com.levia.app
+name: Você - parar a triagem apaga as respostas e volta para o consentimento
+---
+- clearState
+- launchApp
+- tapOn: "Aceito"
+- tapOn: "Precisa de ajuda.*"
+- assertVisible: "Abrir o mapa do corpo"
+- tapOn: "Você"
+- tapOn: "Parar a triagem e apagar respostas"
+- assertVisible: "Parar a triagem?"
+- tapOn: "(?i)PARAR E APAGAR"
+- assertVisible: "Antes de começar"
+- tapOn: "Aceito"
+- assertVisible: "Boas-vindas de volta!|Você"

@@ -1,0 +1,18 @@
+appId: br.com.levia.app
+name: Minha dor piorou com sinal de alerta novo -> saída 3 com vá hoje (M1)
+# Roda depois do 09 (plano ativo).
+---
+- launchApp
+- tapOn: "Início"
+- tapOn: "Minha dor piorou.*"
+- assertVisible: ".*Sinto muito que a dor piorou. Vou fazer umas perguntas.*"
+- runFlow: { file: _responder.yaml, env: { T: "5" } }
+- runFlow: { file: _responder.yaml, env: { T: "nao" } }
+- runFlow: { file: _responder.yaml, env: { T: "agora tenho dormencia na virilha" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- assertVisible: ".*Você marcou: dormência na virilha.*"
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Vá hoje a um pronto atendimento."
+- tapOn: "Exercícios"
+- assertVisible: ".*parados por agora.*"

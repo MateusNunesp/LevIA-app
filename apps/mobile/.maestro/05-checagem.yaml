@@ -4,9 +4,11 @@ name: Checagem semanal na conversa (perfil demo Ana)
 ---
 - launchApp
 - tapOn: { text: "Aceito", optional: true }
-- tapOn: "Você"
+# o seletor de perfil fica na aba Você (funcionário) ou no fim da Visão geral (RH)
+- tapOn: { text: "Você", optional: true }
 - scrollUntilVisible: { element: "Funcionária \\(Ana\\)", direction: DOWN }
 - tapOn: "Funcionária \\(Ana\\)"
+- tapOn: "Conversa"
 - assertVisible: ".*pergunta rápida da semana 1.*"
 - runFlow: { file: _responder.yaml, env: { T: "2" } }
 - runFlow: { file: _responder.yaml, env: { T: "nao" } }

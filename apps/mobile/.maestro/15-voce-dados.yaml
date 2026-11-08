@@ -1,0 +1,11 @@
+appId: br.com.levia.app
+name: Você - baixar meus dados abre o compartilhamento e o app continua de pé
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: "Você"
+- tapOn: "Baixar meus dados"
+- extendedWaitUntil: { notVisible: "Baixar meus dados", timeout: 10000 }
+- back
+- assertVisible: "Meus dados"
+- assertVisible: "O que o RH vê"

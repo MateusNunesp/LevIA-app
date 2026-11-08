@@ -2,6 +2,7 @@ appId: br.com.levia.app
 name: Fluxo completo só por texto, sem nenhum botão de resposta
 ---
 - launchApp
+- tapOn: "Conversa"
 - tapOn: "Mensagem"
 - inputText: "dói a lombar"
 - tapOn: "Enviar"

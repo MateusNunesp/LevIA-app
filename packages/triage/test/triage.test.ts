@@ -112,6 +112,26 @@ describe("vinheta por regra", () => {
   });
 });
 
+describe("checagem extra (minha dor piorou, semana 0)", () => {
+  const extra = (nota: number, achados = {}, limitaTrabalho = false) => ({
+    checagens: [{ semana: 0 as const, nota, limitaTrabalho, achados }],
+    episodiosAnteriores: [],
+  });
+  it("não dispara regras de semana da D3 (piora leve mantém a saída 1)", () => {
+    const r = t(base({ dorNota: 3 }), extra(5, {}, true));
+    expect(r.saida).toBe(1);
+    expect(r.regrasDisparadas.some((x) => x.startsWith("S2-D3"))).toBe(false);
+  });
+  it("nota 7 sai da saída 1 pela regra existente (S1 exige nota <= 6)", () => {
+    expect(t(base(), extra(7)).regrasDisparadas[0]).toBe("S2-SEM-REGRA");
+  });
+  it("nota 8 é caso complexo; sinal novo é saída 3 com vá hoje", () => {
+    expect(t(base(), extra(8)).regrasDisparadas[0]).toBe("CX-DOR-FORTE");
+    const r = t(base(), extra(4, { urina: true }));
+    expect([r.saida, r.urgenteHoje]).toEqual([3, true]);
+  });
+});
+
 describe("vinhetas do lab/c.html", () => {
   it("dor 4 -> saída 1", () => expect(t(base({ dorNota: 4 })).saida).toBe(1));
   it("dor 8 -> saída 3", () => expect(t(base({ dorNota: 8 })).saida).toBe(3));

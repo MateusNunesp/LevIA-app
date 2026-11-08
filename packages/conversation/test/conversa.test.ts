@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { carregarConteudo } from "@levia/content";
 import { triage } from "@levia/triage";
 import type { MensagemLevia, Regiao } from "@levia/shared";
-import { detectarGuardrail, iniciar, iniciarChecagem, montarResultado, passo, type Entrada, type Saida } from "../src/index.ts";
+import { detectarGuardrail, iniciar, iniciarChecagem, iniciarPiora, montarResultado, passo, type Entrada, type Saida } from "../src/index.ts";
 
 const conteudo = carregarConteudo();
 const c = { arvore: conteudo.arvore, textos: conteudo.textos };
@@ -166,6 +166,25 @@ describe("checagem semanal (D3)", () => {
   it("checagens repetem os sinais de alerta", () => {
     const r = rodar(["2", "não"], iniciarChecagem(c, ["lombar"], 1));
     expect(r.mensagens.at(-1)).toMatchObject({ textoId: "alerta.neuro_lombar" });
+  });
+});
+
+describe("minha dor piorou", () => {
+  it("sem plano: acolhida e depois o mapa", () => {
+    const s = iniciarPiora(c);
+    expect(s.mensagens.map((m) => m.tipo)).toEqual(["texto", "cartao_mapa"]);
+    expect(s.mensagens[0]).toMatchObject({ textoId: "piora.nova.intro" });
+  });
+  it("com plano: checagem extra com intro própria e sinais de alerta de novo", () => {
+    const r = rodar(["5", "não"], iniciarChecagem(c, ["lombar"], 0));
+    expect(iniciarChecagem(c, ["lombar"], 0).mensagens[0]).toMatchObject({ textoId: "piora.checagem.intro" });
+    expect(r.mensagens.at(-1)).toMatchObject({ textoId: "alerta.neuro_lombar" });
+  });
+  it("checagem extra confirmada sai com semana 0 e sem pergunta de recuperação", () => {
+    const r = rodar(["5", "não", "nenhuma", "nenhuma", "nenhuma", "sim"], iniciarChecagem(c, ["lombar"], 0));
+    if (r.confirmado?.tipo !== "checagem") throw new Error("não confirmou");
+    expect(r.confirmado.checagem).toMatchObject({ semana: 0, nota: 5, limitaTrabalho: false });
+    expect(r.confirmado.checagem.recuperado).toBeUndefined();
   });
 });
 

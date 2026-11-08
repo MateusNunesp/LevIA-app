@@ -3,7 +3,9 @@ import { EMPRESA_PADRAO, SETOR_PADRAO, logSemSaude, montarServico } from "./mont
 
 const modo = (process.env.LEVIA_MODE ?? "dev") as "producao" | "dev" | "bench";
 const sv = montarServico({ log: logSemSaude });
-const app = criarApp(sv, { empresaPadrao: EMPRESA_PADRAO, setorPadrao: SETOR_PADRAO, modo, logger: true });
+// TODO(login): por enquanto todos veem a área do RH (só agregados). LEVIA_RH_PARA_TODOS=0 volta a exigir o papel de RH.
+const rhParaTodos = process.env.LEVIA_RH_PARA_TODOS !== "0";
+const app = criarApp(sv, { empresaPadrao: EMPRESA_PADRAO, setorPadrao: SETOR_PADRAO, modo, logger: true, rhParaTodos });
 
 // Job de retenção (D12): na subida e uma vez por dia.
 sv.retencao();

@@ -63,8 +63,11 @@ export interface DiaPessoa {
   cumpriu: boolean;
 }
 
-/** Pontos de uma pessoa: dias cumpridos (máx 1 por dia) e dias que contam (não neutros). */
-export function constanciaPessoa(dias: DiaPessoa[]): { cumpridos: number; contam: number } {
+/**
+ * Pontos de uma pessoa: dias cumpridos (máx 1 por dia) e dias que contam (não neutros).
+ * `hoje`: o dia de hoje só conta depois de cumprido (o dia ainda não acabou).
+ */
+export function constanciaPessoa(dias: DiaPessoa[], hoje?: string): { cumpridos: number; contam: number } {
   const porDia = new Map<string, DiaPessoa>();
   for (const d of dias) {
     const atual = porDia.get(d.dia);
@@ -75,6 +78,7 @@ export function constanciaPessoa(dias: DiaPessoa[]): { cumpridos: number; contam
   let contam = 0;
   for (const d of porDia.values()) {
     if (!d.planoAtivo) continue; // neutro
+    if (hoje && d.dia === hoje && !d.cumpriu) continue; // hoje ainda em aberto: neutro
     contam += 1;
     if (d.cumpriu) cumpridos += 1;
   }
@@ -90,22 +94,23 @@ export interface EquipeEntrada {
 export interface PlacarEquipe {
   setorId: string;
   nome: string;
-  /** média, entre participantes ativos, da fração de dias cumpridos — em % inteiro */
-  constancia: number;
+  /** média, entre participantes ativos, da fração de dias cumpridos — em % inteiro; null = ninguém com dias que contam */
+  constancia: number | null;
   participantes: number;
 }
 
-export function placar(equipes: EquipeEntrada[], minimo = MINIMO_EQUIPE): PlacarEquipe[] {
+export function placar(equipes: EquipeEntrada[], minimo = MINIMO_EQUIPE, hoje?: string): PlacarEquipe[] {
   const out: PlacarEquipe[] = [];
   for (const e of equipes) {
     // participantes do Ritmo (inclusive os em pausa) definem se a equipe aparece
     if (e.membros.length < minimo) continue;
     const fracoes = e.membros
-      .map(constanciaPessoa)
+      .map((m) => constanciaPessoa(m, hoje))
       .filter((p) => p.contam > 0) // participante ativo = tem dias que contam
       .map((p) => p.cumpridos / p.contam);
-    const constancia = fracoes.length ? Math.round((fracoes.reduce((a, b) => a + b, 0) / fracoes.length) * 100) : 0;
+    // D6: dias em pausa são neutros. Sem nenhum participante com dias que contam, não há nota (e não 0%).
+    const constancia = fracoes.length ? Math.round((fracoes.reduce((a, b) => a + b, 0) / fracoes.length) * 100) : null;
     out.push({ setorId: e.setorId, nome: e.nome, constancia, participantes: e.membros.length });
   }
-  return out.sort((a, b) => b.constancia - a.constancia || a.nome.localeCompare(b.nome));
+  return out.sort((a, b) => (b.constancia ?? -1) - (a.constancia ?? -1) || a.nome.localeCompare(b.nome, "pt-BR"));
 }

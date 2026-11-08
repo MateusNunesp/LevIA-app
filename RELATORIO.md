@@ -150,3 +150,63 @@ build anterior, com a API em `LEVIA_HOJE=2026-11-12`. As mudanças seguintes (te
 tocam a checagem, mas o 05 não foi repetido no APK final.
 Precisam da API no ar e do `adb reverse tcp:3333 tcp:3333`.
 
+## 8. Depois do MVP: aba Início (decisão do time)
+
+- O app agora **abre no Início** ("Boas-vindas de volta!"), com os atalhos **Precisa de ajuda?**, **Exercícios
+  pendentes** e **Minha dor piorou**. Isso muda a 4.1 ("abre direto na Conversa"), por decisão do time. O resto não mudou.
+- **Minha dor piorou:** com plano ativo, vira uma checagem extra na hora, com os sinais de alerta de novo (D3); sem plano,
+  vira uma autoanamnese nova. Nenhuma regra clínica nova (ADR 0016). Pendente para a D5: piora moderada fora das semanas.
+- O botão do topo da conversa diz **"Ligue 192"** e ficou menor (continua com 44 pt de altura).
+- Testes automáticos novos: 4 na API (sem plano, piora leve, nota 7 → saída 2, alerta novo → saída 3 com "vá hoje"),
+  3 no motor (checagem extra não dispara regras de semana; nota 7 sai da saída 1; nota 8 e alerta → saída 3) e 3 na
+  conversa. Fluxos Maestro novos: `08-inicio`, `09-piora-com-plano`, `10-piora-com-alerta` e `11-ligue-192`.
+- **No celular (Galaxy S24), os 11 fluxos passaram** com o APK do repositório novo: 10 numa bateria de 17 min e o 05 com
+  a API em `LEVIA_HOJE=2026-11-12`.
+- Bugs que a bateria pegou e foram corrigidos: (1) na primeira vez que a conversa abria pelo "Minha dor piorou", o app
+  começava duas conversas (dois mapas); (2) no fim de uma checagem, o teclado ficava aberto e escondia as abas.
+
+## 9. Bateria do Ritmo e de outras áreas (sem a conversa)
+
+**Bugs encontrados e corrigidos:**
+1. **Laço de pedidos ao servidor.** Com a aba Ritmo aberta, o app pedia o placar ~28 vezes por segundo, sem parar. A aba
+   Exercícios e a checagem da conversa também entravam em laço. Isso gastava bateria e internet, sobrecarregava o
+   servidor e apagava a mensagem de erro antes de ela aparecer. Causa: `useTexto` devolvia uma função nova a cada render,
+   e ela estava nas dependências do "carregar ao focar a aba". Agora a função é memorizada. Medição no celular: **0
+   pedidos em 10 s** com qualquer aba parada. Há um teste de regressão (`apps/mobile/test/sessao.test.tsx`), e conferi
+   que ele falha sem a correção.
+2. **Sair e entrar de novo no Ritmo no mesmo dia dava erro interno.** O consentimento e a participação tentavam gravar
+   linhas com a mesma chave. Agora a mesma linha é reaproveitada.
+3. **Apelido repetido na mesma equipe era aceito.** Agora é recusado, sem diferença de maiúsculas e acentos ("Ana" =
+   "ana"), com a mensagem "Alguém da sua equipe já usa esse apelido". Em outra equipe pode.
+4. **O dia de hoje contava contra antes de acabar** (de manhã, quem ainda não tinha feito parecia ter falhado). Agora
+   hoje só conta depois de cumprido.
+5. **Equipe só com pessoas em pausa aparecia com 0%**, o que contraria a D6. Agora aparece "sem dias que contam
+   ainda", sem posição no ranking.
+6. **Apelidos fora de ordem** ("Colega 10" antes de "Colega 2"). Agora em ordem natural.
+7. **Mensagem de erro enganosa** ao entrar no Ritmo: dizia sempre "use um apelido de 2 a 20 letras". Agora cada erro
+   tem a mensagem certa.
+8. **Confirmação do "Fiz!" no topo da tela**, fora de vista em exercícios mais abaixo. Agora aparece abaixo do botão
+   tocado e é anunciada ao leitor de tela. O botão evita registro duplo e vira "Feito hoje" no limite da dose.
+9. **Visual:** ao rolar, o conteúdo passava por baixo do relógio (agora há um fundo atrás da barra de status). Quando a
+   equipe da pessoa ainda não aparece no ranking, há uma explicação ("Sua equipe aparece aqui quando tiver pelo menos
+   5 pessoas no Ritmo").
+
+**Testes:** 10 testes novos na API do Ritmo (`apps/api/test/ritmo.test.ts`) e 1 de regressão no app. Fluxos Maestro
+novos: `12-ritmo-entrar-sair`, `13-ritmo-apelido-repetido`, `14-ritmo-fiz`, `15-voce-dados`, `16-revogar-triagem` e
+`17-rh-setores`. **Os 6 passaram no celular.** Por pedido do time, os fluxos da conversa não rodaram nesta bateria.
+Na anterior, todos passaram, mas eles ainda não rodaram com as correções de agora (`useTexto` memorizado e o fundo
+atrás da barra de status também mexem na conversa).
+
+## 10. Menu único e área do RH aberta a todos (decisão do time, provisória)
+
+- **Um menu de baixo só para o app inteiro:** Início, Conversa, Exercícios, Ritmo, Você e **RH**. Na área do RH, as três
+  telas (Visão geral, Setores, Relatório NR-1) ficam em abas no topo, e o menu de baixo continua levando de volta à Home
+  e ao resto do app.
+- **Por enquanto, a aba RH aparece para todos**, e qualquer aparelho registrado lê os agregados
+  (`LEVIA_RH_PARA_TODOS`, ligada por padrão). As rotas do RH continuam devolvendo **só agregados com k ≥ 10**.
+  TODO(login): desligar (`LEVIA_RH_PARA_TODOS=0`) quando houver login; isso muda a 4.8, que separava a área do RH por papel.
+- **Quem tem papel de RH também usa a própria área de funcionário** (os próprios dados). O RH continua sem ver dado
+  de outra pessoa.
+- Com 6 abas, os rótulos usam 12 pt (antes 13), para "Exercícios" caber inteiro.
+- Testes: 2 testes novos na API (RH na própria área de funcionário; agregados para todos com a chave ligada).
+

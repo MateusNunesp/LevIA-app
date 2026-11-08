@@ -94,6 +94,52 @@ describe("API do funcionário", () => {
     expect((await ctx.app.inject({ method: "GET", url: "/v1/eu/plano", headers: h })).json().status).toBe("pausado");
   });
 
+  describe("minha dor piorou (aba Início)", () => {
+    const sessaoPiora = async (ctx: Ctx, h: Record<string, string>) => (await ctx.app.inject({ method: "POST", url: "/v1/sessoes", headers: h, payload: { modo: "piora" } })).json();
+    const responder = async (ctx: Ctx, h: Record<string, string>, id: string, ts: string[]) => {
+      let r;
+      for (const t of ts) r = (await ctx.app.inject({ method: "POST", url: `/v1/sessoes/${id}/mensagens`, headers: h, payload: { tipo: "texto", texto: t } })).json();
+      return r;
+    };
+    it("sem plano ativo: autoanamnese nova, com acolhida e o mapa", async () => {
+      const ctx = montarTeste();
+      const { h } = await pessoa(ctx);
+      const s = await sessaoPiora(ctx, h);
+      expect(s.mensagens.map((m: { textoId?: string; tipo: string }) => m.textoId ?? m.tipo)).toEqual(["piora.nova.intro", "pergunta.regiao"]);
+      expect(s.mensagens[1].tipo).toBe("cartao_mapa");
+    });
+    it("com plano ativo: checagem extra; piora leve mantém o plano e a agenda", async () => {
+      const ctx = montarTeste();
+      const { h } = await pessoa(ctx);
+      await conversar(ctx, h, [["lombar"], "3 dias", "4", "nenhuma", "nenhuma", "nenhuma", ...START_BAIXO, "sim"]);
+      const antes = (await ctx.app.inject({ method: "GET", url: "/v1/eu/plano", headers: h })).json();
+      const s = await sessaoPiora(ctx, h);
+      expect(s.mensagens[0].textoId).toBe("piora.checagem.intro");
+      const r = await responder(ctx, h, s.id, ["5", "não", "nenhuma", "nenhuma", "nenhuma", "sim"]);
+      expect(r.mensagens.at(-1).textoId).toBe("piora.continua");
+      const depois = (await ctx.app.inject({ method: "GET", url: "/v1/eu/plano", headers: h })).json();
+      expect(depois.status).toBe("ativo");
+      expect(depois.checagens).toEqual(antes.checagens);
+    });
+    it("com plano ativo: nota 7 vai para a saída 2 e pausa o plano (sem regra nova: nota > 6 sai da saída 1)", async () => {
+      const ctx = montarTeste();
+      const { h } = await pessoa(ctx);
+      await conversar(ctx, h, [["lombar"], "3 dias", "4", "nenhuma", "nenhuma", "nenhuma", ...START_BAIXO, "sim"]);
+      const s = await sessaoPiora(ctx, h);
+      const r = await responder(ctx, h, s.id, ["7", "sim", "nenhuma", "nenhuma", "nenhuma", "sim"]);
+      expect(r.mensagens.find((m: { tipo: string }) => m.tipo === "resultado")).toMatchObject({ saida: 2 });
+      expect((await ctx.app.inject({ method: "GET", url: "/v1/eu/plano", headers: h })).json().status).toBe("pausado");
+    });
+    it("com plano ativo: sinal de alerta novo -> saída 3 com vá hoje (M1)", async () => {
+      const ctx = montarTeste();
+      const { h } = await pessoa(ctx);
+      await conversar(ctx, h, [["lombar"], "3 dias", "4", "nenhuma", "nenhuma", "nenhuma", ...START_BAIXO, "sim"]);
+      const s = await sessaoPiora(ctx, h);
+      const r = await responder(ctx, h, s.id, ["5", "não", "agora tenho dormência na virilha", "nenhuma", "nenhuma", "sim"]);
+      expect(r.mensagens.find((m: { tipo: string }) => m.tipo === "resultado")).toMatchObject({ saida: 3, urgenteHoje: true });
+    });
+  });
+
   it("registro acima da dose é recusado (M9)", async () => {
     const ctx = montarTeste();
     const { h } = await pessoa(ctx);
@@ -219,6 +265,31 @@ describe("RH (M7)", () => {
     if (!total.suprimido && !ti.suprimido) expect(total.valor - ti.valor === 0 || total.valor - ti.valor >= 10).toBe(true);
     const pdf = await ctx.app.inject({ method: "GET", url: "/v1/rh/nr1.pdf", headers: h });
     expect(pdf.headers["content-type"]).toContain("application/pdf");
+  });
+
+  it("quem é do RH usa a própria área de funcionário; funcionário continua sem agregados", async () => {
+    const ctx = montarTeste();
+    const rhId = novoId();
+    const hRh = { "x-levia-dispositivo": rhId };
+    await ctx.app.inject({ method: "POST", url: "/v1/dispositivos", payload: { id: rhId } });
+    ctx.db.$client.prepare("UPDATE pessoa SET papel = 'rh' WHERE id_pseudonimo = ?").run(rhId);
+    expect((await ctx.app.inject({ method: "POST", url: "/v1/consentimentos", headers: hRh, payload: { tipo: "triagem", versao: 1 } })).statusCode).toBe(200);
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/eu/plano", headers: hRh })).statusCode).toBe(200);
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/ritmo/placar", headers: hRh })).statusCode).toBe(200);
+    expect((await ctx.app.inject({ method: "POST", url: "/v1/sessoes", headers: hRh, payload: {} })).statusCode).toBe(200);
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/rh/agregados", headers: hRh })).statusCode).toBe(200);
+    const { h } = await pessoa(ctx);
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/rh/agregados", headers: h })).statusCode).toBe(403);
+  });
+
+  it("com LEVIA_RH_PARA_TODOS ligado, qualquer aparelho lê os agregados, e só agregados", async () => {
+    const ctx = montarTeste({ rhParaTodos: true });
+    const { h } = await pessoa(ctx);
+    const r = await ctx.app.inject({ method: "GET", url: "/v1/rh/agregados", headers: h });
+    expect(r.statusCode).toBe(200);
+    for (const c of r.json().celulas) expect(Object.keys(c).sort()).toEqual([...CAMPOS_PERMITIDOS].sort());
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/rh/nr1.csv", headers: h })).statusCode).toBe(200);
+    expect((await ctx.app.inject({ method: "GET", url: "/v1/rh/agregados", headers: { "x-levia-dispositivo": "nao-registrado-0000000000" } })).statusCode).toBe(401);
   });
 
   it("filtro livre extra é recusado", async () => {

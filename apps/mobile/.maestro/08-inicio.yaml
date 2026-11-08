@@ -1,0 +1,16 @@
+appId: br.com.levia.app
+name: Início com atalhos; "Minha dor piorou" leva a mensagem para a conversa
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- assertVisible: "Boas-vindas de volta!"
+- tapOn: "Exercícios pendentes.*"
+- assertVisible: "Exercícios"
+- tapOn: "Início"
+- tapOn: "Minha dor piorou.*"
+- assertVisible: "Abrir o mapa do corpo"
+- scrollUntilVisible: { element: ".*Sinto muito que a dor piorou.*", direction: UP }
+- assertVisible: "Minha dor piorou"
+- tapOn: "Início"
+- tapOn: "Precisa de ajuda.*"
+- assertVisible: "Mensagem"

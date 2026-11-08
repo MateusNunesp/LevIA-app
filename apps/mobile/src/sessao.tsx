@@ -23,15 +23,37 @@ const Ctx = createContext<Sessao | null>(null);
 
 export function SessaoProvider({ children }: { children: React.ReactNode }) {
   const [s, setS] = useState<Omit<Sessao, "recarregar" | "aceitarTriagem" | "definirSoVoz">>({
-    pronto: false, erro: null, id: null, papel: null, triagemAceita: false, ritmoAceito: false, textos: {}, revisaoPendente: false, soVoz: false,
+    pronto: false,
+    erro: null,
+    id: null,
+    papel: null,
+    triagemAceita: false,
+    ritmoAceito: false,
+    textos: {},
+    revisaoPendente: false,
+    soVoz: false,
   });
 
   const recarregar = useCallback(async () => {
     try {
       const id = await idDoAparelho();
       definirDispositivo(id);
-      const [reg, tx, voz] = await Promise.all([api.registrar(id), api.textos(), SecureStore.getItemAsync("levia.so_voz")]);
-      setS({ pronto: true, erro: null, id, papel: reg.papel, triagemAceita: reg.triagemAceita, ritmoAceito: reg.ritmoAceito, textos: tx.textos, revisaoPendente: tx.revisaoPendente, soVoz: voz === "1" });
+      const [reg, tx, voz] = await Promise.all([
+        api.registrar(id),
+        api.textos(),
+        SecureStore.getItemAsync("levia.so_voz"),
+      ]);
+      setS({
+        pronto: true,
+        erro: null,
+        id,
+        papel: reg.papel,
+        triagemAceita: reg.triagemAceita,
+        ritmoAceito: reg.ritmoAceito,
+        textos: tx.textos,
+        revisaoPendente: tx.revisaoPendente,
+        soVoz: voz === "1",
+      });
     } catch (e) {
       setS((x) => ({ ...x, pronto: true, erro: e instanceof ErroApi ? e.codigo : "erro" }));
     }
@@ -60,8 +82,12 @@ export function useSessao(): Sessao {
   return c;
 }
 
-/** Texto aprovado vindo do servidor; nunca inventado no app. */
+/**
+ * Texto aprovado vindo do servidor; nunca inventado no app.
+ * A função é memorizada: ela entra em dependências de efeitos (carregar ao focar a aba). Se mudasse a cada
+ * render, o efeito rodaria de novo a cada render, num laço de pedidos ao servidor.
+ */
 export function useTexto() {
   const { textos } = useSessao();
-  return (id: string) => textos[id] ?? "";
+  return useCallback((id: string) => textos[id] ?? "", [textos]);
 }

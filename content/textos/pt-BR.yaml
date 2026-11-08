@@ -134,6 +134,9 @@ textos:
   checagem.trabalho.nao: "não atrapalha o trabalho"
   checagem.continua: "Que bom. Siga com os exercícios. Vou te chamar de novo em {data}."
   checagem.fim: "Que bom! Seu acompanhamento terminou. Se a dor voltar, é só me chamar."
+  piora.checagem.intro: "Sinto muito que a dor piorou. Vou fazer umas perguntas rápidas para ver o que fazer."
+  piora.nova.intro: "Sinto muito que a dor piorou. Vamos olhar isso de novo, com calma."
+  piora.continua: "Entendi. Por agora, siga com os exercícios com calma, sem forçar. Se piorar mais, me chame de novo."
   notificacao.texto: "A LevIA tem uma pergunta rápida pra você"
 
   # ---- guardrails (R12) ----
@@ -154,5 +157,6 @@ textos:
   estado.offline: "Sem conexão. Sua mensagem vai assim que a internet voltar."
   estado.ia_off: "Agora eu entendo melhor respostas curtas. Use poucas palavras, por favor."
   estado.voz_off: "A voz não está funcionando agora. Você pode escrever."
+  estado.voz_sem_pt: "Este celular não tem voz em português para ler as mensagens. Você pode instalar em Configurações, na parte de texto para fala."
   estado.voz_nuvem: "Neste celular, a voz passa pelo serviço do sistema do celular para virar texto. Se preferir, escreva."
   revisao.faixa: "Conteúdo em revisão"

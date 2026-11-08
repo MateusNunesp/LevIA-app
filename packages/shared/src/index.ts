@@ -42,6 +42,8 @@ export type Achado = (typeof ACHADOS)[number];
 export type Saida = 1 | 2 | 3;
 export type RiscoStart = "baixo" | "medio" | "alto";
 export type Semana = 1 | 2 | 4 | 6;
+/** 0 = checagem extra, pedida pela pessoa ("minha dor piorou"). Não casa com regras de semana da D3. */
+export type SemanaChecagem = Semana | 0;
 
 export interface StartBackResultado {
   total: number;
@@ -73,7 +75,7 @@ export interface RespostasConfirmadas {
 }
 
 export interface Checagem {
-  semana: Semana;
+  semana: SemanaChecagem;
   nota: number;
   limitaTrabalho: boolean;
   achados: Partial<Record<Achado, boolean>>;

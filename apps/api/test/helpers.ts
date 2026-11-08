@@ -6,7 +6,7 @@ import { criarApp } from "../src/app.ts";
 import { garantirPadrao } from "../src/montar.ts";
 import { Servico, type Metrica } from "../src/servico.ts";
 
-export function montarTeste(op: { modo?: "dev" | "bench"; hoje?: string } = {}) {
+export function montarTeste(op: { modo?: "dev" | "bench"; hoje?: string; rhParaTodos?: boolean } = {}) {
   const db = abrirDb(":memory:");
   garantirPadrao(db, "emp", "setor-geral");
   const relogio = { atual: op.hoje ?? "2026-11-08" };
@@ -15,7 +15,7 @@ export function montarTeste(op: { modo?: "dev" | "bench"; hoje?: string } = {}) 
     hoje: () => relogio.atual,
     agora: () => `${relogio.atual}T12:00:00.000Z`,
   }, (m) => logs.push(m));
-  const app = criarApp(sv, { empresaPadrao: "emp", setorPadrao: "setor-geral", modo: op.modo ?? "dev" });
+  const app = criarApp(sv, { empresaPadrao: "emp", setorPadrao: "setor-geral", modo: op.modo ?? "dev", rhParaTodos: op.rhParaTodos ?? false });
   return { app, sv, db, relogio, logs, schema };
 }
 

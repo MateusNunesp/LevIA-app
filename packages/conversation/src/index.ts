@@ -8,7 +8,7 @@ import type {
   MensagemLevia,
   Regiao,
   RespostasConfirmadas,
-  Semana,
+  SemanaChecagem,
 } from "@levia/shared";
 import { ACHADOS, NOME_REGIAO, REGIOES } from "@levia/shared";
 import { emergencia as detectarEmergencia, mencoes, type Emergencia } from "@levia/redflags";
@@ -60,7 +60,7 @@ export interface PerguntaUnica {
 
 export interface Estado {
   modo: "autoanamnese" | "checagem";
-  semana?: Semana;
+  semana?: SemanaChecagem;
   etapa: Etapa;
   /** etapa para onde voltar depois das perguntas fechadas de menção/dúvida */
   fila: PerguntaUnica[];
@@ -169,7 +169,7 @@ export function iniciar(c: Contexto): Saida {
   };
 }
 
-export function iniciarChecagem(c: Contexto, regioes: Regiao[], semana: Semana): Saida {
+export function iniciarChecagem(c: Contexto, regioes: Regiao[], semana: SemanaChecagem): Saida {
   const estado: Estado = {
     modo: "checagem",
     semana,
@@ -183,7 +183,14 @@ export function iniciarChecagem(c: Contexto, regioes: Regiao[], semana: Semana):
     perguntasFeitas: 1,
     iaIndisponivel: false,
   };
-  return { estado, mensagens: [msg(c, "checagem.intro", { semana }), msg(c, "checagem.nota")] };
+  const intro = semana === 0 ? msg(c, "piora.checagem.intro") : msg(c, "checagem.intro", { semana });
+  return { estado, mensagens: [intro, msg(c, "checagem.nota")] };
+}
+
+/** "Minha dor piorou" sem plano ativo: uma autoanamnese nova, com uma frase de acolhida antes do mapa. */
+export function iniciarPiora(c: Contexto): Saida {
+  const s = iniciar(c);
+  return { ...s, mensagens: [msg(c, "piora.nova.intro"), ...s.mensagens] };
 }
 
 /** Pergunta da etapa atual (ou da fila de perguntas fechadas). */

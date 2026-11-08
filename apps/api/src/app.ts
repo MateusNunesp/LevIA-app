@@ -53,6 +53,11 @@ export interface OpcoesApp {
   setorPadrao: string;
   modo: "producao" | "dev" | "bench";
   logger?: boolean;
+  /**
+   * Por enquanto (decisão do time), qualquer aparelho registrado lê os agregados do RH. As rotas continuam
+   * devolvendo só agregados com k >= 10. TODO(login): desligar (LEVIA_RH_PARA_TODOS=0) quando houver login.
+   */
+  rhParaTodos?: boolean;
 }
 
 export function criarApp(sv: Servico, op: OpcoesApp): FastifyInstance {
@@ -99,14 +104,15 @@ export function criarApp(sv: Servico, op: OpcoesApp): FastifyInstance {
   const rh = (req: FastifyRequest) => {
     const id = entrada(zIdDispositivo, req.headers["x-levia-dispositivo"]);
     const p = sv.pessoa(id);
-    if (p.papel !== "rh") throw new ErroHttp(403, "papel_rh_necessario");
+    if (!op.rhParaTodos && p.papel !== "rh") throw new ErroHttp(403, "papel_rh_necessario");
     return p;
   };
-  const funcionario = (req: FastifyRequest) => {
-    const id = dono(req);
-    if (sv.pessoa(id).papel !== "funcionario") throw new ErroHttp(403, "papel_funcionario_necessario");
-    return id;
-  };
+  /**
+   * Área do funcionário: os próprios dados da pessoa (conversa, plano, Ritmo, meus dados).
+   * Quem tem papel de RH também é funcionário e usa a própria área; o que o RH nunca vê é dado de OUTRA
+   * pessoa (4.8). As rotas de agregados continuam exigindo o papel de RH.
+   */
+  const funcionario = (req: FastifyRequest) => dono(req);
 
   app.get("/v1/saude", async () => ({ ok: true }));
 
@@ -147,7 +153,7 @@ export function criarApp(sv: Servico, op: OpcoesApp): FastifyInstance {
   // ---------- conversa ----------
   app.post("/v1/sessoes", async (req) => {
     const id = funcionario(req);
-    const b = entrada(z.object({ modo: z.enum(["autoanamnese", "checagem"]).optional() }).strict(), req.body ?? {});
+    const b = entrada(z.object({ modo: z.enum(["autoanamnese", "checagem", "piora"]).optional() }).strict(), req.body ?? {});
     const s = sv.novaSessao(id, b.modo);
     return saida(z.object({ id: z.string(), mensagens: z.array(zMensagem) }), s);
   });

@@ -1,0 +1,22 @@
+appId: br.com.levia.app
+name: Ritmo - apelido já usado na equipe mostra a mensagem certa
+# Antes de rodar: um colega no setor padrão precisa estar no Ritmo com o apelido "Repetido"
+# (o script de bateria cria esse colega pela API).
+---
+- clearState
+- launchApp
+- tapOn: "Aceito"
+- evalScript: ${output.outro = 'Outro ' + Math.floor(Math.random() * 90000 + 10000)}
+- tapOn: "Ritmo"
+- tapOn: "Apelido para a sua equipe"
+- inputText: "repetido"
+- hideKeyboard
+- tapOn: "Entrar no Ritmo"
+- assertVisible: "Alguém da sua equipe já usa esse apelido.*"
+- assertVisible: "Escolha um apelido"
+- tapOn: "Apelido para a sua equipe"
+- eraseText: 20
+- inputText: ${output.outro}
+- hideKeyboard
+- tapOn: "Entrar no Ritmo"
+- assertVisible: "Só você vê isto"

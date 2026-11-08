@@ -1,0 +1,35 @@
+appId: br.com.levia.app
+name: Minha dor piorou com plano ativo -> checagem extra; piora leve mantém o plano
+---
+- launchApp
+- tapOn: { text: "Aceito", optional: true }
+- tapOn: "Conversa"
+- runFlow: { file: _responder.yaml, env: { T: "recomecar" } }
+- runFlow: { file: _responder.yaml, env: { T: "lombar" } }
+- runFlow: { file: _responder.yaml, env: { T: "uns 3 dias" } }
+- runFlow: { file: _responder.yaml, env: { T: "4" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- repeat:
+    times: 8
+    commands:
+      - runFlow: { file: _responder.yaml, env: { T: "discordo" } }
+- runFlow: { file: _responder.yaml, env: { T: "pouco" } }
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Dá para cuidar em casa"
+- tapOn: "Início"
+- assertVisible: "Exercícios pendentes.*para hoje.*"
+- tapOn: "Minha dor piorou.*"
+- assertVisible: "Minha dor piorou"
+- assertVisible: ".*Sinto muito que a dor piorou. Vou fazer umas perguntas.*"
+- runFlow: { file: _responder.yaml, env: { T: "5" } }
+- runFlow: { file: _responder.yaml, env: { T: "nao" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- runFlow: { file: _responder.yaml, env: { T: "nenhuma" } }
+- assertVisible: "Entendi: nota 5, não atrapalha o trabalho.*"
+- runFlow: { file: _responder.yaml, env: { T: "sim" } }
+- assertVisible: "Entendi. Por agora, siga com os exercícios.*"
+- tapOn: "Exercícios"
+- assertVisible: "Fiz!"

@@ -1,0 +1,12 @@
+appId: br.com.levia.app
+name: Botão "Ligue 192" no topo da conversa (só abre o discador; não liga)
+---
+- launchApp
+- tapOn: "Conversa"
+- assertVisible: "Ligue 192"
+- assertNotVisible: "Emergência.*"
+- tapOn: "Ligue 192, emergência"
+- assertNotVisible: "Mensagem"
+- back
+- launchApp
+- assertVisible: "Boas-vindas de volta!|Mensagem"
