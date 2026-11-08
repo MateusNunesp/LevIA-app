@@ -32,6 +32,7 @@ PROFUNDA = "#12443a"
 SUAVE = "#d5e7e0"
 BALAO = "#dcefe8"
 
+# Sem zoom no celular: todas as cenas usam zoom 1.00 (o celular fica parado e inteiro).
 # Celular na tela: área da tela (proporção 1080x2340) e moldura
 TELA_W, TELA_H = 444, 962
 TELA_X, TELA_Y = 1250, 59
@@ -41,18 +42,19 @@ BORDA = 14
 # Um mesmo texto pode cobrir dois trechos (cena s07 = c07 acelerada + começo de c08).
 CENAS = [
     ("s01", [("c01-inicio", 0.6, 4.8)], 3.4, "Tudo começa num toque", 1.00, 0.30),
-    ("s02", [("c02-mapa", 1.8, 11.6)], 5.8, "Toque onde dói", 1.10, 0.42),
-    ("s03", [("c03-conversa", 3.0, 119.0)], 8.0, "Perguntas curtas.\nAlertas sempre.", 1.06, 0.30),
-    ("s04", [("c04-resultado", 7.0, 16.2)], 6.2, "Orientação clara\ne explicada", 1.10, 0.30),
-    ("s05", [("c05-exercicios", 4.2, 16.0)], 6.0, "Exercício com vídeo\ne dose certa", 1.06, 0.38),
+    # mapa do corpo quase na velocidade real (1,09x), para a seleção ficar fácil de acompanhar
+    ("s02", [("c02-mapa", 1.8, 11.6)], 9.0, "Toque onde dói", 1.00, 0.42),
+    ("s03", [("c03-conversa", 3.0, 119.0)], 7.0, "Perguntas curtas.\nAlertas sempre.", 1.00, 0.30),
+    ("s04", [("c04-resultado", 7.0, 16.2)], 6.2, "Orientação clara\ne explicada", 1.00, 0.30),
+    ("s05", [("c05-exercicios", 4.2, 16.0)], 5.6, "Exercício com vídeo\ne dose certa", 1.00, 0.38),
     ("s06", [("c06-ritmo", 4.2, 16.3)], 5.6, "Constância em equipe,\nsem expor ninguém", 1.00, 0.50),
-    ("s07", [("c07-piora", 1.0, 55.4), ("c08-voz", 0.3, 3.0)], 8.0, "Sinal de alerta?\nVá hoje.", 1.08, 0.22),
+    ("s07", [("c07-piora", 1.0, 55.4), ("c08-voz", 0.3, 3.0)], 7.4, "Sinal de alerta?\nVá hoje.", 1.00, 0.22),
     ("s08", [("c08-voz", 3.6, 10.4)], 5.0, "Fale ou escreva.\nVocê escolhe.", 1.00, 0.50),
-    ("s09", [("c09-rh", 4.2, 16.6)], 7.0, "O RH vê só\nnúmeros do time", 1.00, 0.50),
+    ("s09", [("c09-rh", 4.2, 16.6)], 6.4, "O RH vê só\nnúmeros do time", 1.00, 0.50),
 ]
 INTRO, OUTRO = 4.0, 5.0
 # divisão do tempo da s07 entre os dois trechos
-S07_PARTES = [5.4, 2.6]
+S07_PARTES = [5.0, 2.4]
 
 NARRACAO = {
     "intro": "Dor no corpo atrapalha o trabalho. E nem sempre dá para saber o que fazer.",
